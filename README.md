@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hairver Green
 
-## Getting Started
+The ecommerce platform for **Hairver Green — Luxury Hair House · Lagos**. It includes the storefront, checkout, customer accounts, and a full admin for running the business: orders, returns, profit reporting, content and staff.
 
-First, run the development server:
+- **Stack:** Next.js 16 (App Router), React 19, Tailwind CSS 4, Supabase (Postgres, Auth and Storage), Paystack and Resend. It deploys to Vercel.
+- **Money:** every amount is stored in kobo as an integer. Customers can view prices in USD, GBP or EUR, but they are always charged in NGN.
+- **Deployment:** see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+## What's inside
+
+| Area | Highlights |
+| --- | --- |
+| Storefront | CMS-driven homepage and pages; mega-menu; listings with filters and search; product pages with variants and gallery; bundles; collection deals; wishlist; cart drawer; recently viewed; Hair Journal |
+| Checkout | Guest or account checkout. Shipping comes from zones and methods; tax and coupon rules apply. Stock is reserved while payment is pending. Paystack payments are verified server-side, and webhooks are signature-checked and idempotent. |
+| Accounts | Customers can see orders, invoices and tracking, and request returns. They can also manage addresses, their wishlist, account details and notification preferences. |
+| Services | Custom unit configurator: pricing comes from settings, and some options flag the order for staff review. Customers can also book consultations. |
+| Admin | **Dashboard and Sales & profit:** revenue, COGS, fees, expenses and net profit.<br>**Orders:** orders, fulfilment, invoices, returns and refunds (Paystack refund API), and payments.<br>**Customers:** abandoned carts with recovery links, customers and segments.<br>**Catalogue:** products with variants and bundles, inventory with an audit trail, categories and collections.<br>**Marketing:** discounts and coupons, campaigns, popups, announcement bar and social gallery.<br>**Content:** page builder, Hair Journal (draft → review → schedule → publish), media library and navigation.<br>**Operations:** shipping and taxes.<br>**Administration:** staff and roles with granular permissions, settings and theme, and the audit log. |
+| Security | Row-level security on every table. Permission checks run on the server for every admin action, and privilege escalation is blocked. Secrets live only in environment variables, and HTML is sanitised. Uploads go through signed URLs, and every admin change is logged. |
+
+## Local development
 
 ```bash
+npm install
+cp .env.example .env.local   # fill in Supabase keys (Paystack/Resend optional)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Apply the database with the Supabase CLI (`supabase db push`), or paste each file from `supabase/migrations` into the SQL editor in order. Then run `supabase/seed.sql` to load the demo catalogue.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+To get your first admin, add your email to `BOOTSTRAP_SUPER_ADMIN_EMAILS`, create an account at `/register`, and sign in at `/admin`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Project layout
 
-## Learn More
+```
+src/app/(store)        storefront routes          src/app/admin           admin panel
+src/app/(checkout)     checkout                   src/app/api             route handlers (cart, checkout, webhooks, cron…)
+src/lib/commerce       pricing, cart, orders      src/lib/payments        payment provider abstraction (Paystack)
+src/lib/data           cached catalogue/content   src/lib/admin           reports, resources, page-builder schema
+supabase/migrations    schema, functions, RLS     supabase/seed.sql       demo data (labelled as demo)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Before launch
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Replace the demo products, artwork and journal posts. Use `supabase/clear_demo.sql` to remove test orders and sample content.
+2. Write your real policies (Privacy, Terms, Refund, Shipping and Cookie) under **Admin → Pages**. They currently contain placeholders.
+3. Add cost prices to variants so profit reporting is accurate, and log your business expenses.
+4. Switch Paystack to live keys and run one small real payment end to end.
