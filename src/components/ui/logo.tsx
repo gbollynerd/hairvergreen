@@ -20,11 +20,11 @@ export function Mark({ className, title = 'Hairver Green' }: { className?: strin
 export function Wordmark({ className, tagline = false, logoUrl }: { className?: string; tagline?: boolean; logoUrl?: string | null }) {
   if (logoUrl) {
     // eslint-disable-next-line @next/next/no-img-element
-    return <img src={logoUrl} alt="Hairver Green" className={cn('h-9 w-auto', className)} />;
+    return <img src={logoUrl} alt="Hairver Green" className={cn('h-8 w-auto max-w-[56vw] object-contain md:h-9', className)} />;
   }
   return (
     <span className={cn('inline-flex flex-col items-center leading-none', className)}>
-      <span className="wordmark text-[17px] md:text-[20px] whitespace-nowrap">Hairver Green</span>
+      <span className="wordmark whitespace-nowrap text-[clamp(13px,4.3vw,17px)] max-[360px]:tracking-[0.24em] md:text-[20px]">Hairver Green</span>
       {tagline && (
         <>
           <span className="rule-gold my-2" aria-hidden />

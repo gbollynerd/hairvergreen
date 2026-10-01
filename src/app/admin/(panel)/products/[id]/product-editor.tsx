@@ -113,7 +113,7 @@ export function ProductEditor({ product, variants: v0, media: m0, relations: r0,
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[200px_1fr]">
-        <nav aria-label="Product sections" className="flex gap-1 overflow-x-auto lg:flex-col">
+        <nav aria-label="Product sections" className="-mx-4 flex gap-1 overflow-x-auto px-4 scrollbar-none md:mx-0 md:px-0 lg:flex-col">
           {TABS.filter((t) => !(isBundle && t === 'Inventory')).map((t, i) => (
             <button key={t} type="button" onClick={() => setTab(t)} aria-current={tab === t ? 'step' : undefined}
               className={cn('flex shrink-0 items-center gap-3 px-3 py-2 text-left text-[13px]', tab === t ? 'bg-surface font-medium ring-1 ring-line' : 'text-muted hover:text-ink')}>

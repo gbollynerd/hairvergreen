@@ -212,14 +212,14 @@ function MediaValue({ value, kind, onChange }: { value: any; kind?: 'image' | 'v
   return (
     <div className="flex flex-wrap items-start gap-3">
       <div className="grid h-24 w-24 shrink-0 place-items-center overflow-hidden border border-line bg-panel">
-        {v?.url ? (v.kind === 'video' ? <video src={v.url} className="h-full w-full object-cover" muted /> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={v.url} alt="" className="h-full w-full object-cover" />) : <ImageIcon size={20} className="text-muted" />}
+        {v?.url ? (v.kind === 'video' ? <video src={v.poster ? v.url : `${v.url}#t=0.5`} poster={v.poster || undefined} preload="metadata" className="h-full w-full object-cover" muted /> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={v.url} alt="" className="h-full w-full object-cover" />) : <ImageIcon size={20} className="text-muted" />}
       </div>
       <div className="grid min-w-[220px] flex-1 gap-2">
         <div className="flex gap-2"><button type="button" onClick={() => setOpen(true)} className="btn btn-outline btn-sm">{v?.url ? 'Change' : 'Choose from library'}</button>{v?.url && <button type="button" onClick={() => onChange(null)} className="text-[12px] text-muted underline">Remove</button>}</div>
         {v?.url && <input value={v.alt ?? ''} onChange={(e) => onChange({ ...v, alt: e.target.value })} className="input !text-[13px]" placeholder="Alt text (describe the image)" aria-label="Alt text" />}
-        {v?.kind === 'video' && <input value={v.poster ?? ''} onChange={(e) => onChange({ ...v, poster: e.target.value })} className="input !text-[13px]" placeholder="Poster image URL (optional)" aria-label="Poster image" />}
+        {v?.kind === 'video' && <p className="text-[12px] text-muted">Plays muted on a loop while on screen. {v.poster ? 'Uses the video’s thumbnail until it starts.' : 'Tip: add a thumbnail to this video in the Media library so it shows while loading.'}</p>}
       </div>
-      <MediaPicker open={open} onClose={() => setOpen(false)} kind={kind} onPick={(p) => p[0] && onChange({ kind: p[0].kind === 'video' ? 'video' : 'image', url: p[0].url, alt: p[0].alt ?? '' })} />
+      <MediaPicker open={open} onClose={() => setOpen(false)} kind={kind} onPick={(p) => p[0] && onChange({ kind: p[0].kind === 'video' ? 'video' : 'image', url: p[0].url, alt: p[0].alt ?? '', ...(p[0].kind === 'video' && p[0].metadata?.poster ? { poster: p[0].metadata.poster } : {}) })} />
     </div>
   );
 }

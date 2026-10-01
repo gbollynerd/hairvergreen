@@ -6,10 +6,10 @@ import { cn } from '@/lib/utils';
 
 export function PageHeader({ title, description, actions, back }: { title: string; description?: React.ReactNode; actions?: React.ReactNode; back?: { href: string; label: string } }) {
   return (
-    <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between">
       <div>
         {back && <Link href={back.href} className="mb-2 inline-block text-[12px] text-muted hover:text-ink">← {back.label}</Link>}
-        <h1 className="font-display text-[34px] leading-tight">{title}</h1>
+        <h1 className="font-display text-[28px] leading-tight sm:text-[34px]">{title}</h1>
         {description && <p className="mt-1 max-w-2xl text-[14px] text-muted">{description}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
@@ -19,14 +19,14 @@ export function PageHeader({ title, description, actions, back }: { title: strin
 
 export function Card({ title, actions, children, className, padded = true }: { title?: React.ReactNode; actions?: React.ReactNode; children: React.ReactNode; className?: string; padded?: boolean }) {
   return (
-    <section className={cn('border border-line bg-surface', className)}>
+    <section className={cn('min-w-0 border border-line bg-surface', className)}>
       {(title || actions) && (
-        <div className="flex items-center justify-between gap-3 border-b border-line px-5 py-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-line px-4 py-3.5 sm:px-5">
           {title && <h2 className="text-[12px] font-medium uppercase tracking-[0.16em]">{title}</h2>}
           {actions}
         </div>
       )}
-      <div className={cn(padded && 'p-5')}>{children}</div>
+      <div className={cn(padded && 'p-4 sm:p-5')}>{children}</div>
     </section>
   );
 }
@@ -98,14 +98,14 @@ export function FilterBar({ children }: { children: React.ReactNode }) {
 }
 export function FilterSelect({ name, label, value, options }: { name: string; label: string; value?: string; options: [string, string][] }) {
   return (
-    <label className="grid gap-1 text-[11px] uppercase tracking-[0.12em] text-muted">{label}
-      <select name={name} defaultValue={value ?? ''} className="input !min-h-[38px] !py-1 !text-[13px] normal-case tracking-normal"><option value="">All</option>{options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
+    <label className="grid min-w-0 flex-1 gap-1 text-[11px] uppercase tracking-[0.12em] text-muted sm:flex-none">{label}
+      <select name={name} defaultValue={value ?? ''} className="input !min-h-[38px] w-full !py-1 !text-[13px] normal-case tracking-normal sm:w-auto sm:max-w-[240px]"><option value="">All</option>{options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}</select>
     </label>
   );
 }
 export function FilterInput({ name, label, value, type = 'text', placeholder }: { name: string; label: string; value?: string; type?: string; placeholder?: string }) {
   return (
-    <label className="grid gap-1 text-[11px] uppercase tracking-[0.12em] text-muted">{label}
+    <label className="grid min-w-0 flex-1 basis-full gap-1 text-[11px] uppercase tracking-[0.12em] text-muted sm:basis-auto sm:flex-none">{label}
       <input name={name} type={type} defaultValue={value ?? ''} placeholder={placeholder} className="input !min-h-[38px] !py-1 !text-[13px] normal-case tracking-normal" />
     </label>
   );

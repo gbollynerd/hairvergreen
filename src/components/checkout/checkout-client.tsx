@@ -128,22 +128,22 @@ export function CheckoutClient({ initialCart, user, addresses, profile, requireP
 
   return (
     <div className="min-h-screen bg-bg">
-      <div className="container-x flex h-16 items-center justify-between border-b border-line">
+      <div className="container-x flex h-16 items-center justify-between gap-4 border-b border-line">
         <Link href="/" className="text-primary"><Wordmark /></Link>
-        <p className="flex items-center gap-2 text-[12px] uppercase tracking-[0.18em] text-muted"><Lock size={14} /> Secure checkout</p>
+        <p className="flex items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-muted sm:text-[12px]"><Lock size={14} /> <span className="max-sm:sr-only">Secure checkout</span></p>
       </div>
-      <div className="container-x grid gap-10 py-8 lg:grid-cols-[1fr_420px] lg:gap-16 lg:py-12">
+      <div className="container-x grid grid-cols-[minmax(0,1fr)] gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:gap-16 lg:py-12">
         {/* Mobile summary toggle */}
         <div className="lg:hidden">
           <button type="button" onClick={() => setSummaryOpen((v) => !v)} aria-expanded={summaryOpen} className="flex w-full items-center justify-between border border-line bg-surface px-4 py-3 text-[14px]">
-            <span className="flex items-center gap-2">{summaryOpen ? 'Hide' : 'Show'} order summary <ChevronDown size={14} className={cn('transition', summaryOpen && 'rotate-180')} /></span>
+            <span className="flex min-w-0 items-center gap-2">{summaryOpen ? 'Hide' : 'Show'} order summary <ChevronDown size={14} className={cn('transition', summaryOpen && 'rotate-180')} /></span>
             <span className="font-medium tabular-nums">{money(q.total)}</span>
           </button>
           {summaryOpen && <div className="border-x border-b border-line bg-surface p-4">{Summary}</div>}
         </div>
 
         <div className="space-y-8">
-          <ol className="flex gap-6 text-[11px] uppercase tracking-[0.2em]" aria-label="Checkout steps">
+          <ol className="flex flex-wrap gap-x-4 gap-y-2 text-[10px] uppercase tracking-[0.16em] sm:gap-6 sm:text-[11px] sm:tracking-[0.2em]" aria-label="Checkout steps">
             {['Contact', 'Delivery', 'Payment'].map((s, i) => (
               <li key={s} className={cn('flex items-center gap-2', step === i + 1 ? 'text-ink' : 'text-muted')} aria-current={step === i + 1 ? 'step' : undefined}>
                 <span className={cn('grid h-6 w-6 place-items-center rounded-full border text-[10px]', step > i + 1 ? 'border-primary bg-primary text-primary-contrast' : step === i + 1 ? 'border-ink' : 'border-line')}>{step > i + 1 ? <Check size={12} /> : i + 1}</span>{s}

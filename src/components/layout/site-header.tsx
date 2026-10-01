@@ -34,17 +34,17 @@ export function SiteHeader({ nav, logoUrl }: { nav: NavItem[]; logoUrl?: string 
   return (
     <header className={cn('sticky top-0 z-50 border-b bg-bg/95 backdrop-blur transition-[border-color,box-shadow] duration-500', scrolled ? 'border-line shadow-[0_1px_18px_rgba(15,61,46,0.06)]' : 'border-transparent')}>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-2 focus:z-50 focus:bg-surface focus:px-4 focus:py-2">Skip to content</a>
-      <div className="container-x grid h-[64px] grid-cols-[1fr_auto_1fr] items-center md:h-[76px]">
+      <div className="container-x grid h-[64px] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 md:h-[76px]">
         <div className="flex items-center gap-1">
           <button type="button" className="grid h-11 w-11 place-items-center lg:hidden" onClick={() => setMenuOpen(true)} aria-label="Open menu"><Menu size={22} strokeWidth={1.3} /></button>
-          <button type="button" className="grid h-11 w-11 place-items-center lg:w-auto lg:gap-2 lg:px-1 lg:flex lg:items-center" onClick={() => setSearchOpen(true)} aria-label="Search">
+          <button type="button" className="hidden h-11 w-11 place-items-center sm:grid lg:w-auto lg:gap-2 lg:px-1 lg:flex lg:items-center" onClick={() => setSearchOpen(true)} aria-label="Search">
             <Search size={20} strokeWidth={1.3} /><span className="hidden caps text-muted lg:inline">Search</span>
           </button>
         </div>
         <Link href="/" aria-label="Hairver Green — home" className="text-primary"><Wordmark logoUrl={logoUrl} /></Link>
         <div className="flex items-center justify-end gap-0.5">
           <Link href={user ? '/account' : '/login'} className="hidden h-11 w-11 place-items-center sm:grid" aria-label={user ? 'Your account' : 'Sign in'}><User size={20} strokeWidth={1.3} /></Link>
-          <Link href="/wishlist" className="relative grid h-11 w-11 place-items-center" aria-label={`Wishlist (${wishlist.length})`}>
+          <Link href="/wishlist" className="relative hidden h-11 w-11 place-items-center sm:grid" aria-label={`Wishlist (${wishlist.length})`}>
             <Heart size={20} strokeWidth={1.3} />
             {wishlist.length > 0 && <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent-strong" aria-hidden />}
           </Link>

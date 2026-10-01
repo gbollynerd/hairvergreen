@@ -12,6 +12,7 @@ import { ProductRail } from './product-rail';
 import { Countdown } from './countdown';
 import { listProducts, productsBySlugs, productsByIds, getFeaturedReviews, getAttributes, getCollection, toCard } from '@/lib/data/catalog';
 import { getPosts, getSocialPosts } from '@/lib/data/content';
+import { supabasePublic } from '@/lib/supabase/public';
 import { sanitizeHtml } from '@/lib/sanitize';
 import { cn, formatDate } from '@/lib/utils';
 
@@ -48,6 +49,14 @@ function Cta({ cta, dark, className }: { cta?: { label?: string; href?: string; 
   if (!cta?.href || !cta.label) return null;
   const style = cta.style === 'secondary' ? (dark ? 'btn-ghost-light' : 'btn-outline') : dark ? 'btn-light' : 'btn-primary';
   return <Link href={cta.href} className={cn('btn', style, className)}>{cta.label}</Link>;
+}
+
+
+/** Image or video for any section: videos play muted while on screen, with their thumbnail as the still. */
+function SectionMedia({ m, sizes, alt, className, priority }: { m?: S | null; sizes: string; alt?: string; className?: string; priority?: boolean }) {
+  if (!m?.url) return null;
+  if (m.kind === 'video') return <Video src={m.url} poster={m.poster} className={cn('absolute inset-0', className)} />;
+  return <Media src={m.url} alt={alt ?? m.alt ?? ''} fill sizes={sizes} priority={priority} className={className} />;
 }
 
 // ---------------------------------------------------------------------------
@@ -140,7 +149,7 @@ async function Hero({ s }: { s: S }) {
       <div className="absolute inset-0">
         {m.kind === 'video' && m.url ? <Video src={m.url} poster={m.poster} className={cn(mm.url && 'max-md:hidden')} />
           : m.url ? <Media src={m.url} alt={m.alt ?? ''} fill priority sizes="100vw" className={cn('animate-[fade-in_1.6s_ease]', mm.url && 'max-md:hidden')} /> : null}
-        {mm.url && (mm.kind === 'video' ? <Video src={mm.url} className="md:hidden" /> : <Media src={mm.url} alt={mm.alt ?? ''} fill priority sizes="100vw" className="md:hidden" />)}
+        {mm.url && (mm.kind === 'video' ? <Video src={mm.url} poster={mm.poster} className="md:hidden" /> : <Media src={mm.url} alt={mm.alt ?? ''} fill priority sizes="100vw" className="md:hidden" />)}
         <div className="absolute inset-0" style={{ background: dark ? `linear-gradient(180deg, rgba(8,28,21,${(s.overlay ?? 0.25) * 0.5}) 0%, rgba(8,28,21,${s.overlay ?? 0.25}) 100%)` : `rgba(246,242,234,${s.overlay ?? 0})` }} />
       </div>
       <div className={cn('container-x relative z-10 flex w-full py-16 md:py-24', align)}>
@@ -221,7 +230,7 @@ function Editorial({ s }: { s: S }) {
     <Shell s={{ ...s, spacing: s.spacing ?? 'none' }} full>
       <div className="grid md:grid-cols-2">
         <Reveal variant="image" className={cn('relative min-h-[420px] md:min-h-[640px]', imgRight && 'md:order-2')}>
-          {s.media?.kind === 'video' ? <Video src={s.media.url} /> : <Media src={s.media?.url} alt={s.media?.alt ?? ''} fill sizes="50vw" />}
+          <SectionMedia m={s.media} sizes="(min-width:768px) 50vw, 100vw" />
         </Reveal>
         <div className="flex items-center px-6 py-16 md:px-14 lg:px-24">
           <Reveal className="max-w-lg">
@@ -243,7 +252,7 @@ async function ShopTheLook({ s }: { s: S }) {
     <Shell s={s}>
       <div className="grid items-start gap-10 lg:grid-cols-12">
         <Reveal variant="image" className="relative aspect-[4/5] overflow-hidden bg-panel lg:col-span-7 lg:aspect-[16/12]">
-          <Media src={s.media?.url} alt={s.media?.alt ?? ''} fill sizes="(min-width:1024px) 58vw, 100vw" />
+          <SectionMedia m={s.media} sizes="(min-width:1024px) 58vw, 100vw" />
         </Reveal>
         <div className="lg:col-span-5">
           {s.eyebrow && <p className="eyebrow mb-3">{s.eyebrow}</p>}
@@ -262,7 +271,7 @@ async function CollectionFeature({ s }: { s: S }) {
   return (
     <section className={cn('relative overflow-hidden bg-primary text-primary-contrast', s.hide_on_mobile && 'max-md:hidden')}>
       <div className="grid min-h-[80vh] lg:grid-cols-2">
-        <div className="relative min-h-[420px] lg:order-2"><Media src={img} alt={s.media?.alt ?? col?.name ?? ''} fill sizes="50vw" /></div>
+        <div className="relative min-h-[420px] lg:order-2"><SectionMedia m={s.media?.url ? s.media : img ? { url: img, kind: 'image' } : null} alt={s.media?.alt || col?.name || ''} sizes="(min-width:1024px) 50vw, 100vw" /></div>
         <div className="flex items-center px-6 py-20 md:px-14 lg:px-20">
           <Reveal className="max-w-xl">
             <p className="eyebrow !text-accent">{s.eyebrow || col?.name}</p>
@@ -319,7 +328,7 @@ function ProcessSteps({ s }: { s: S }) {
           </ol>
           <Cta cta={s.cta} className="mt-10" />
         </div>
-        <Reveal variant="image" className="relative aspect-[4/5] overflow-hidden lg:col-span-7 lg:aspect-[5/4]"><Media src={s.media?.url} alt={s.media?.alt ?? ''} fill sizes="58vw" /></Reveal>
+        <Reveal variant="image" className="relative aspect-[4/5] overflow-hidden lg:col-span-7 lg:aspect-[5/4]"><SectionMedia m={s.media} sizes="(min-width:1024px) 58vw, 100vw" /></Reveal>
       </div>
     </Shell>
   );
@@ -422,7 +431,7 @@ function RichText({ s }: { s: S }) {
 function FullImage({ s }: { s: S }) {
   const inner = (
     <div className={cn('relative w-full overflow-hidden', s.aspect === 'tall' ? 'aspect-[4/5] md:aspect-[16/9]' : 'aspect-[16/10] md:aspect-[21/9]')}>
-      {s.media?.kind === 'video' ? <Video src={s.media.url} poster={s.media.poster} /> : <Media src={s.media?.url} alt={s.media?.alt ?? ''} fill sizes="100vw" />}
+      <SectionMedia m={s.media} sizes="100vw" />
       {(s.heading || s.text) && (
         <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/50 to-transparent">
           <div className="container-x pb-10 text-primary-contrast md:pb-16"><h2 className="display-2 max-w-2xl">{s.heading}</h2>{s.text && <p className="mt-3 max-w-xl opacity-85">{s.text}</p>}<Cta cta={s.cta} dark className="mt-6" /></div>
@@ -438,7 +447,7 @@ function Banner({ s }: { s: S }) {
   return (
     <Shell s={{ ...s, spacing: s.spacing ?? 'sm' }}>
       <Reveal className={cn('relative flex flex-col items-center gap-5 overflow-hidden px-6 py-12 text-center md:flex-row md:justify-between md:px-14 md:text-left', dark ? 'bg-primary text-primary-contrast' : 'bg-panel')}>
-        {s.media?.url && <div className="absolute inset-0 opacity-25"><Media src={s.media.url} alt="" fill sizes="100vw" /></div>}
+        {s.media?.url && <div className="absolute inset-0 opacity-25"><SectionMedia m={s.media} alt="" sizes="100vw" /></div>}
         <div className="relative">
           {s.eyebrow && <p className={cn('eyebrow', dark && '!text-accent')}>{s.eyebrow}</p>}
           <p className="mt-2 font-display text-[30px] leading-tight md:text-[40px]">{s.heading}</p>
@@ -558,7 +567,7 @@ function ImageSection({ s }: { s: S }) {
   return (
     <Shell s={s}>
       <figure className={cn('mx-auto', s.width === 'narrow' ? 'max-w-3xl' : 'max-w-6xl')}>
-        <div className="relative aspect-[16/10] overflow-hidden bg-panel"><Media src={s.media?.url} alt={s.media?.alt ?? ''} fill sizes="80vw" /></div>
+        <div className="relative aspect-[16/10] overflow-hidden bg-panel"><SectionMedia m={s.media} sizes="(min-width:1024px) 80vw, 100vw" /></div>
         {s.caption && <figcaption className="mt-3 text-center text-[13px] text-muted">{s.caption}</figcaption>}
       </figure>
     </Shell>
@@ -570,7 +579,7 @@ function VideoSection({ s }: { s: S }) {
     <Shell s={s}>
       <Heading s={s} center />
       <div className="mx-auto aspect-video max-w-5xl overflow-hidden bg-panel">
-        {s.media?.url && <video src={s.media.url} poster={s.media.poster} controls playsInline preload="metadata" className="h-full w-full object-cover" />}
+        {s.media?.url && <video src={s.media.poster ? s.media.url : `${s.media.url}#t=0.1`} poster={s.media.poster ?? undefined} controls playsInline preload="metadata" className="h-full w-full object-cover" />}
       </div>
     </Shell>
   );
@@ -588,7 +597,25 @@ const REGISTRY: Record<string, (p: { s: S }) => React.ReactNode | Promise<React.
 
 export const SECTION_TYPES = Object.keys(REGISTRY);
 
-export async function SectionRenderer({ sections }: { sections: PageSection[] }) {
+/** Section videos saved without a thumbnail pick up the one stored in the media library. */
+async function withVideoPosters(sections: PageSection[]): Promise<PageSection[]> {
+  const urls = new Set<string>();
+  for (const sec of sections) for (const k of ['media', 'mobile_media']) {
+    const m = (sec.settings as S | null)?.[k];
+    if (m?.kind === 'video' && m.url && !m.poster) urls.add(m.url);
+  }
+  if (!urls.size) return sections;
+  const { data } = await supabasePublic().from('media').select('url, metadata').in('url', [...urls]);
+  const poster = new Map((data ?? []).map((r: { url: string; metadata: { poster?: string } | null }) => [r.url, r.metadata?.poster ?? null]));
+  return sections.map((sec) => {
+    const st: S = { ...(sec.settings ?? {}) };
+    for (const k of ['media', 'mobile_media']) if (st[k]?.kind === 'video' && !st[k].poster && poster.get(st[k].url)) st[k] = { ...st[k], poster: poster.get(st[k].url) };
+    return { ...sec, settings: st };
+  });
+}
+
+export async function SectionRenderer({ sections: raw }: { sections: PageSection[] }) {
+  const sections = await withVideoPosters(raw);
   return (
     <>
       {sections.filter((x) => x.is_visible).map((sec) => {

@@ -279,7 +279,7 @@ function StickyBar({ name, price, disabled, onAdd }: { name: string; price: numb
     return () => io.disconnect();
   }, []);
   return (
-    <div className={cn('fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur transition-transform duration-500 lg:hidden', show ? 'translate-y-0' : 'translate-y-full')} aria-hidden={!show}>
+    <div className={cn('fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 pb-[max(12px,env(safe-area-inset-bottom))] pt-3 backdrop-blur transition-transform duration-500 lg:hidden', show ? 'translate-y-0' : 'translate-y-full')} aria-hidden={!show} inert={!show}>
       <div className="flex items-center gap-3">
         <div className="min-w-0 flex-1"><p className="truncate font-display text-[16px]">{name}</p><p className="text-[13px] tabular-nums">{money(price)}</p></div>
         <button type="button" onClick={onAdd} disabled={disabled} tabIndex={show ? 0 : -1} className="btn btn-primary">Add to bag</button>

@@ -31,7 +31,7 @@ function AddressForm({ address, onDone }: { address: Address | null; onDone: () 
   const [state, action, pending] = useActionState(async (prev: unknown, fd: FormData) => { const r = await saveAddress(prev, fd); if ('ok' in r) onDone(); return r; }, null as null | { error?: string; ok?: boolean });
   const [country, setCountry] = useState(address?.country ?? 'NG');
   return (
-    <form action={action} className="mt-6 grid gap-4 border border-line bg-surface p-6 md:grid-cols-2">
+    <form action={action} className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-4 border border-line bg-surface p-4 sm:p-6 md:grid-cols-2">
       {address?.id && <input type="hidden" name="id" value={address.id} />}
       <label className="field md:col-span-2"><span className="label">Label (e.g. Home, Office)</span><input name="label" defaultValue={address?.label ?? ''} className="input" /></label>
       <label className="field"><span className="label">First name</span><input name="first_name" required defaultValue={address?.first_name} className="input" /></label>
@@ -46,7 +46,7 @@ function AddressForm({ address, onDone }: { address: Address | null; onDone: () 
       <label className="field"><span className="label">Phone</span><input name="phone" defaultValue={address?.phone ?? ''} className="input" /></label>
       <label className="flex items-center gap-3 text-[14px] md:col-span-2"><input type="checkbox" name="is_default_shipping" defaultChecked={address?.is_default_shipping} className="h-4 w-4 accent-[var(--hg-primary)]" /> Default delivery address</label>
       {state?.error && <p className="text-[13px] text-sale md:col-span-2" role="alert">{state.error}</p>}
-      <div className="flex gap-3 md:col-span-2"><button disabled={pending} className="btn btn-primary">{pending ? 'Saving…' : 'Save address'}</button><button type="button" onClick={onDone} className="btn btn-outline">Cancel</button></div>
+      <div className="flex flex-wrap gap-3 md:col-span-2"><button disabled={pending} className="btn btn-primary">{pending ? 'Saving…' : 'Save address'}</button><button type="button" onClick={onDone} className="btn btn-outline">Cancel</button></div>
     </form>
   );
 }

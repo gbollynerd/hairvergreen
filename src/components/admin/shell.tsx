@@ -108,7 +108,7 @@ export function AdminShell({ staff, children }: { staff: { email: string; name: 
             <form action="/auth/signout" method="post"><button className="underline">Sign out</button></form>
           </div>
         </header>
-        <main className="px-4 py-8 md:px-8">{children}</main>
+        <main className="admin-main px-4 py-6 md:px-8 md:py-8">{children}</main>
       </div>
     </div>
   );

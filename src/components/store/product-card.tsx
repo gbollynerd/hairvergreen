@@ -36,11 +36,11 @@ export function ProductCard({ p, priority, className, sizes = '(min-width:1280px
           <div className="flex items-center gap-2 text-[12px] text-muted"><Stars value={p.rating_avg} size={11} /> <span>({p.rating_count})</span></div>
         )}
         <Price amount={p.price_min} compareAt={p.compare_at} from={p.price_max > p.price_min} />
-        <div className="mt-2 flex gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
-          <button type="button" onClick={quickAdd} disabled={!p.in_stock} className="btn btn-outline btn-sm flex-1" aria-label={`Quick add ${p.name}`}>
+        <div className="mt-2 flex min-w-0 gap-2 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
+          <button type="button" onClick={quickAdd} disabled={!p.in_stock} className="btn btn-outline btn-sm min-w-0 flex-1 !px-2 sm:!px-4" aria-label={`Quick add ${p.name}`}>
             <Plus size={14} strokeWidth={1.5} /> {p.in_stock ? (p.default_variant_id && p.product_type !== 'bundle_deal' ? 'Add' : 'Choose') : 'Sold out'}
           </button>
-          <button type="button" onClick={(e) => { e.preventDefault(); setQuickView(p.slug); }} className="btn btn-outline btn-sm px-3" aria-label={`Quick view ${p.name}`}>
+          <button type="button" onClick={(e) => { e.preventDefault(); setQuickView(p.slug); }} className="btn btn-outline btn-sm px-3 max-[389px]:hidden" aria-label={`Quick view ${p.name}`}>
             <Eye size={15} strokeWidth={1.4} />
           </button>
         </div>

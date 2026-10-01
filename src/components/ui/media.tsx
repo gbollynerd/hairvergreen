@@ -24,9 +24,7 @@ export function Media({ src, alt, className, fill, sizes, priority, width, heigh
   );
 }
 
-export function Video({ src, poster, className }: { src: string; poster?: string | null; className?: string }) {
-  return <video src={src} poster={poster ?? undefined} className={cn('h-full w-full object-cover', className)} autoPlay muted loop playsInline preload="metadata" />;
-}
+export { Video } from './video';
 
 /** `#t=` makes browsers (including iOS Safari) paint that frame instead of a blank box when there is no poster. */
 export const videoFrameSrc = (url: string, at = 0.5) => (url.includes('#') ? url : `${url}#t=${at}`);
