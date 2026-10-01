@@ -21,7 +21,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const parent = categories.find((p) => p.id === c.parent_id);
       return { url: u(parent ? `/${parent.slug}/${c.slug}` : `/${c.slug}`), changeFrequency: 'weekly' as const, priority: 0.8 };
     }),
-    ...entries.map((p) => ({ url: u(`/products/${p.slug}`), lastModified: p.created_at, changeFrequency: 'weekly' as const, priority: 0.9, images: p.images.filter((i) => !i.url.endsWith('.svg')).slice(0, 1).map((i) => (i.url.startsWith('http') ? i.url : u(i.url))) })),
+    ...entries.map((p) => ({ url: u(`/products/${p.slug}`), lastModified: p.created_at, changeFrequency: 'weekly' as const, priority: 0.9, images: p.images.filter((i) => i.kind !== 'video' && !i.url.endsWith('.svg')).slice(0, 1).map((i) => (i.url.startsWith('http') ? i.url : u(i.url))) })),
     ...cols.filter((c) => c.is_visible).map((c) => ({ url: u(`/collections/${c.slug}`), changeFrequency: 'weekly' as const, priority: 0.7 })),
     ...posts.filter((p) => !p.noindex).map((p) => ({ url: u(`/journal/${p.slug}`), lastModified: p.updated_at, changeFrequency: 'monthly' as const, priority: 0.6 })),
     ...(pages ?? []).filter((p) => !p.noindex && p.slug !== 'home').map((p) => ({ url: u(p.kind === 'policy' ? `/policies/${p.slug}` : `/${p.slug}`), lastModified: p.updated_at, changeFrequency: 'monthly' as const, priority: 0.4 })),

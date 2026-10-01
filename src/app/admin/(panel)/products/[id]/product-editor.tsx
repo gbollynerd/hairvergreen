@@ -218,7 +218,7 @@ export function ProductEditor({ product, variants: v0, media: m0, relations: r0,
               <ul className="space-y-3">{media.map((m, i) => (
                 <li key={m.media_id + i} className="flex flex-wrap items-center gap-3 border border-line p-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  {m.kind === 'video' ? <video src={m.url} className="h-20 w-16 object-cover" muted /> : <img src={m.url} alt="" className="h-20 w-16 object-cover" />}
+                  {m.kind === 'video' ? <video src={`${m.url}#t=0.5`} preload="metadata" className="h-20 w-16 object-cover" muted /> : <img src={m.url} alt="" className="h-20 w-16 object-cover" />}
                   <input value={m.alt} onChange={(e) => { setMedia((x) => x.map((y, n) => n === i ? { ...y, alt: e.target.value } : y)); setDirty(true); }} placeholder="Alt text (describe the image)" className={cn(inp, 'min-w-[200px] flex-1')} />
                   {optionKeys.map((k) => (
                     <select key={k} value={m.option_match[k] ?? ''} onChange={(e) => { const om = { ...m.option_match }; if (e.target.value) om[k] = e.target.value; else delete om[k]; setMedia((x) => x.map((y, n) => n === i ? { ...y, option_match: om } : y)); setDirty(true); }} className={cn(inp, '!w-auto')} aria-label={`${k} for this image`}>

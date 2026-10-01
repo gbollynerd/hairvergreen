@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import type { ProductCardData } from '@/lib/types';
 import { useStore } from '@/components/store/store-provider';
-import { Media } from '@/components/ui/media';
+import { Media, MediaThumb } from '@/components/ui/media';
 import { Price } from '@/components/store/price';
 
 export function AccountWishlist({ items }: { items: { product: ProductCardData; price_at_add: number | null; notify_restock: boolean }[] }) {
@@ -16,7 +16,7 @@ export function AccountWishlist({ items }: { items: { product: ProductCardData; 
         const dropped = price_at_add && p.price_min < price_at_add;
         return (
           <li key={p.id} className="flex gap-4 py-5">
-            <Link href={`/products/${p.slug}`} className="relative h-28 w-24 shrink-0 bg-panel"><Media src={p.images[0]?.url} alt={p.name} fill sizes="96px" /></Link>
+            <Link href={`/products/${p.slug}`} className="relative h-28 w-24 shrink-0 bg-panel"><MediaThumb item={p.images[0]} alt={p.name} fill sizes="96px" /></Link>
             <div className="flex flex-1 flex-col gap-1 text-[14px]">
               <Link href={`/products/${p.slug}`} className="font-display text-[19px]">{p.name}</Link>
               <Price amount={p.price_min} compareAt={p.compare_at} from={p.price_max > p.price_min} size="sm" />

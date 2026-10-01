@@ -4,11 +4,11 @@ import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Check, Folder, FolderPlus, Upload, X, Video, FileIcon } from 'lucide-react';
-import { TagsInput, adminToast, uploadToLibrary, CopyText } from '@/components/admin/client';
-import { updateMedia, deleteMedia, moveMedia, replaceMediaFile, createFolder, renameFolder, deleteFolder, mediaUsage } from './actions';
+import { TagsInput, adminToast, uploadToLibrary, uploadVideoPoster, CopyText } from '@/components/admin/client';
+import { updateMedia, deleteMedia, moveMedia, replaceMediaFile, createFolder, renameFolder, deleteFolder, mediaUsage, setVideoPoster } from './actions';
 import { cn } from '@/lib/utils';
 
-type Item = { id: string; url: string; alt: string; title: string | null; filename: string | null; kind: string; mime_type: string | null; width: number | null; height: number | null; size_bytes: number | null; tags: string[] | null; folder_id: string | null; created_at: string };
+type Item = { id: string; url: string; alt: string; title: string | null; filename: string | null; kind: string; mime_type: string | null; width: number | null; height: number | null; size_bytes: number | null; tags: string[] | null; folder_id: string | null; created_at: string; metadata?: { poster?: string | null } | null };
 type FolderT = { id: string; name: string; parent_id: string | null };
 
 const fmtSize = (b?: number | null) => (!b ? '—' : b > 1e6 ? `${(b / 1e6).toFixed(1)} MB` : `${Math.round(b / 1e3)} KB`);
@@ -89,7 +89,7 @@ export function MediaLibrary({ items, total, page, perPage, folders, tags, filte
             return (
               <div key={m.id} className={cn('group relative aspect-square overflow-hidden border bg-panel', active?.id === m.id ? 'border-primary' : 'border-line')}>
                 <button type="button" onClick={() => setActive(m)} className="h-full w-full" aria-label={`Edit ${m.title || m.filename}`}>
-                  {m.kind === 'video' ? <span className="grid h-full w-full place-items-center"><Video size={22} className="text-muted" /></span> : m.kind === 'file' ? <span className="grid h-full w-full place-items-center"><FileIcon size={22} /></span> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt={m.alt} loading="lazy" className="h-full w-full object-cover" />}
+                  {m.kind === 'video' ? <span className="relative block h-full w-full">{m.metadata?.poster ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.metadata.poster} alt={m.alt} loading="lazy" className="h-full w-full object-cover" /> : <video src={`${m.url}#t=0.5`} muted preload="metadata" className="h-full w-full object-cover" />}<span className="absolute bottom-1 right-1 grid h-6 w-6 place-items-center bg-primary/80 text-primary-contrast"><Video size={12} /></span></span> : m.kind === 'file' ? <span className="grid h-full w-full place-items-center"><FileIcon size={22} /></span> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt={m.alt} loading="lazy" className="h-full w-full object-cover" />}
                 </button>
                 <button type="button" onClick={() => setSel(on ? sel.filter((x) => x !== m.id) : [...sel, m.id])} aria-label={on ? 'Deselect' : 'Select'} aria-pressed={on}
                   className={cn('absolute left-1.5 top-1.5 grid h-6 w-6 place-items-center border bg-surface', on ? 'border-primary bg-primary text-primary-contrast' : 'border-line opacity-0 group-hover:opacity-100 focus:opacity-100')}>{on && <Check size={13} />}</button>
@@ -123,6 +123,7 @@ function Details({ m, folders, canDelete, onClose, run, pending }: { m: Item; fo
   const [folder, setFolder] = useState(m.folder_id ?? '');
   const [usage, setUsage] = useState<{ label: string; count: number }[] | null>(null);
   const [replacing, setReplacing] = useState(false);
+  const [thumbBusy, setThumbBusy] = useState(false);
   useEffect(() => { mediaUsage(m.id).then(setUsage); }, [m.id]);
 
   const replace = async (file?: File) => {
@@ -135,7 +136,8 @@ function Details({ m, folders, canDelete, onClose, run, pending }: { m: Item; fo
       const { supabaseBrowser } = await import('@/lib/supabase/client');
       const { error } = await supabaseBrowser().storage.from('media').uploadToSignedUrl(sd.path, sd.token, file, { contentType: file.type });
       if (error) throw new Error(error.message);
-      run(() => replaceMediaFile(m.id, { path: sd.path, mime_type: file.type, size_bytes: file.size, filename: file.name, ...dims }));
+      const poster = file.type.startsWith('video/') ? await uploadVideoPoster(file, file.name) : null;
+      run(() => replaceMediaFile(m.id, { path: sd.path, mime_type: file.type, size_bytes: file.size, filename: file.name, ...dims, ...(poster ? { poster_path: poster.poster_path, width: poster.width, height: poster.height, duration_seconds: poster.duration } : {}) }));
     } catch (e) { adminToast(e instanceof Error ? e.message : 'Replace failed', 'error'); }
     setReplacing(false);
   };
@@ -144,7 +146,7 @@ function Details({ m, folders, canDelete, onClose, run, pending }: { m: Item; fo
     <div className="fixed inset-y-0 right-0 z-[80] w-full max-w-md overflow-y-auto border-l border-line bg-surface p-6 shadow-2xl" role="dialog" aria-label="Media details">
       <div className="mb-4 flex items-center justify-between"><p className="font-display text-[22px]">File details</p><button type="button" onClick={onClose} aria-label="Close" className="grid h-9 w-9 place-items-center"><X size={18} /></button></div>
       <div className="mb-4 grid aspect-[4/3] place-items-center overflow-hidden bg-panel">
-        {m.kind === 'video' ? <video src={m.url} controls className="h-full w-full object-contain" /> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt={m.alt} className="h-full w-full object-contain" />}
+        {m.kind === 'video' ? <video src={m.url} poster={m.metadata?.poster ?? undefined} controls preload="metadata" className="h-full w-full object-contain" /> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt={m.alt} className="h-full w-full object-contain" />}
       </div>
       <dl className="mb-5 grid grid-cols-[90px_1fr] gap-y-1 text-[12px]">
         <dt className="text-muted">File</dt><dd className="truncate">{m.filename}</dd>
@@ -159,6 +161,37 @@ function Details({ m, folders, canDelete, onClose, run, pending }: { m: Item; fo
         <div className="grid gap-1.5"><span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">Tags</span><TagsInput name="_tags" defaultValue={tags} onChange={setTags} /></div>
         <label className="grid gap-1.5"><span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">Folder</span><select value={folder} onChange={(e) => setFolder(e.target.value)} className="input"><option value="">Unfiled</option>{folders.map((f) => <option key={f.id} value={f.id}>{f.name}</option>)}</select></label>
         <button type="button" disabled={pending} onClick={() => run(() => updateMedia(m.id, { alt, title, tags, folder_id: folder || null }))} className="btn btn-primary btn-sm">{pending ? 'Saving…' : 'Save details'}</button>
+        {m.kind === 'video' && (
+          <div className="grid gap-2 border-t border-line pt-4">
+            <span className="text-[11px] font-medium uppercase tracking-[0.12em] text-muted">Thumbnail</span>
+            <div className="flex items-center gap-3">
+              <span className="grid h-20 w-16 shrink-0 place-items-center overflow-hidden bg-panel">{m.metadata?.poster ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.metadata.poster} alt="" className="h-full w-full object-cover" /> : <span className="px-1 text-center text-[10px] text-muted">None yet</span>}</span>
+              <div className="flex flex-col items-start gap-1.5">
+                <button type="button" disabled={thumbBusy} className="btn btn-outline btn-sm" onClick={async () => {
+                  setThumbBusy(true);
+                  const p = await uploadVideoPoster(m.url, m.filename || 'video');
+                  if (p) run(() => setVideoPoster(m.id, p.poster_path, { width: p.width, height: p.height, duration_seconds: p.duration }));
+                  else adminToast('Could not read a frame from this video. Upload a thumbnail image instead.', 'error');
+                  setThumbBusy(false);
+                }}>{thumbBusy ? 'Working…' : m.metadata?.poster ? 'Re-create from video' : 'Create from video'}</button>
+                <label className="cursor-pointer text-[12px] underline">Upload an image instead<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={async (e) => {
+                  const f = e.target.files?.[0]; e.target.value = ''; if (!f) return;
+                  setThumbBusy(true);
+                  try {
+                    const s = await fetch('/api/admin/media/sign', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ filename: f.name, contentType: f.type, size: f.size }) });
+                    const sd = await s.json(); if (!s.ok) throw new Error(sd.error || 'Upload failed');
+                    const { supabaseBrowser } = await import('@/lib/supabase/client');
+                    const { error } = await supabaseBrowser().storage.from('media').uploadToSignedUrl(sd.path, sd.token, f, { contentType: f.type });
+                    if (error) throw new Error(error.message);
+                    run(() => setVideoPoster(m.id, sd.path));
+                  } catch (err) { adminToast(err instanceof Error ? err.message : 'Upload failed', 'error'); }
+                  setThumbBusy(false);
+                }} /></label>
+              </div>
+            </div>
+            <p className="text-[12px] text-muted">Shown on product cards and in the gallery until the video plays.</p>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-3 border-t border-line pt-4">
           <label className="btn btn-outline btn-sm cursor-pointer">{replacing ? 'Uploading…' : 'Replace file'}<input type="file" accept="image/*,video/*" className="sr-only" onChange={(e) => replace(e.target.files?.[0])} /></label>
           {canDelete && <button type="button" className="text-[13px] text-sale underline" onClick={() => {

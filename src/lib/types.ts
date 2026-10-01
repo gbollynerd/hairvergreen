@@ -7,7 +7,11 @@ export type Media = {
   id: string; url: string; alt: string; title: string | null; kind: 'image' | 'video' | 'file';
   width: number | null; height: number | null; mime_type: string | null; filename: string | null;
   folder_id: string | null; tags: string[]; path: string | null; bucket: string; size_bytes: number | null; created_at: string;
+  metadata?: { poster?: string | null; poster_path?: string | null } | null;
 };
+
+/** A product image or video as used on cards (poster = thumbnail for videos). */
+export type CardMedia = { url: string; alt: string; kind?: 'image' | 'video' | 'file'; poster?: string | null };
 
 export type AttributeValue = {
   id: string; attribute: string; label: string; slug: string; sort: number; swatch: string | null;
@@ -47,7 +51,7 @@ export type Product = {
 };
 
 export type ProductCardData = Pick<Product, 'id' | 'name' | 'slug' | 'product_type' | 'is_new' | 'rating_avg' | 'rating_count' | 'short_description'> & {
-  price_min: number; price_max: number; compare_at: number | null; in_stock: boolean; images: { url: string; alt: string }[];
+  price_min: number; price_max: number; compare_at: number | null; in_stock: boolean; images: CardMedia[];
   option_keys: string[]; variant_count: number; default_variant_id: string | null;
 };
 

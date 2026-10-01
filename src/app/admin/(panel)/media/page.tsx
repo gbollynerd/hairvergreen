@@ -14,7 +14,7 @@ export default async function MediaPage({ searchParams }: PageProps<'/admin/medi
   const tag = typeof sp.tag === 'string' ? sp.tag : '';
   const page = Math.max(1, Number(sp.page) || 1);
   const db = supabaseAdmin();
-  let query = db.from('media').select('id, url, alt, title, filename, kind, mime_type, width, height, size_bytes, tags, folder_id, created_at', { count: 'exact' })
+  let query = db.from('media').select('id, url, alt, title, filename, kind, mime_type, width, height, size_bytes, tags, folder_id, created_at, metadata', { count: 'exact' })
     .order('created_at', { ascending: false }).range((page - 1) * PER, page * PER - 1);
   if (folder === 'none') query = query.is('folder_id', null);
   else if (folder) query = query.eq('folder_id', folder);

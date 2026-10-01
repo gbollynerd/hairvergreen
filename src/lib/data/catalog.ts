@@ -22,7 +22,7 @@ type RawProduct = {
   rating_avg: number; rating_count: number; short_description: string | null; category_id: string | null; tags: string[];
   created_at: string; sales_count: number; option_keys: string[]; price: number;
   product_variants: (Variant)[];
-  product_media: { sort: number; option_match: Record<string, string>; media: Pick<Media, 'url' | 'alt'> | null }[];
+  product_media: { sort: number; option_match: Record<string, string>; media: Pick<Media, 'url' | 'alt' | 'kind' | 'metadata'> | null }[];
   collection_products: { collections: { slug: string } | null }[];
   bundles: { pricing_mode: Bundle['pricing_mode']; value: number; bundle_items: { product_id: string; variant_id: string | null; quantity: number; is_optional: boolean }[] } | null;
 };
@@ -35,7 +35,7 @@ async function loadCatalog(): Promise<{ entries: CatalogEntry[]; categories: Cat
       created_at, sales_count, option_keys, price,
       product_variants (id, product_id, sku, title, options, price, compare_at_price, weight_grams, image_id, is_active, position,
         track_inventory, stock_on_hand, stock_reserved, low_stock_threshold, allow_backorder, restock_date),
-      product_media (sort, option_match, media:media_id (url, alt)),
+      product_media (sort, option_match, media:media_id (url, alt, kind, metadata)),
       collection_products (collections (slug)),
       bundles (pricing_mode, value, bundle_items!bundle_items_bundle_product_id_fkey (product_id, variant_id, quantity, is_optional))
     `).order('created_at', { ascending: false }),
@@ -56,7 +56,7 @@ async function loadCatalog(): Promise<{ entries: CatalogEntry[]; categories: Cat
     const images = (p.product_media ?? [])
       .sort((a, b) => a.sort - b.sort)
       .filter((m) => m.media)
-      .map((m) => ({ url: m.media!.url, alt: m.media!.alt || p.name }));
+      .map((m) => ({ url: m.media!.url, alt: m.media!.alt || p.name, kind: m.media!.kind ?? 'image', poster: m.media!.metadata?.poster ?? null }));
 
     let priceMin = variants.length ? Math.min(...variants.map((v) => v.price)) : p.price;
     let priceMax = variants.length ? Math.max(...variants.map((v) => v.price)) : p.price;

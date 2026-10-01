@@ -116,6 +116,8 @@ select (select id from public.media_folders where name = 'Demo artwork'), '/demo
   case when f like 'hero.svg' then 1080 when f like 'hero-mobile%' then 1400 when f like 'editorial-2%' then 1000 when f like 'custom-unit%' then 1100 when f like 'journal%' then 800 when f like 'editorial%' then 1500 when f like 'social%' then 900 else 1000 end,
   array['demo']
 from (values ${mediaFiles.map(([f, t]) => `(${q(f)}, ${q(t)})`).join(', ')}) v(f, t);`);
+sql(`insert into public.media (folder_id, url, filename, title, alt, kind, mime_type, width, height, size_bytes, tags)
+values ((select id from public.media_folders where name = 'Editorial'), '/hero/hero-curly.jpg', 'hero-curly.jpg', 'Hero — curly hair portrait', 'Model wearing voluminous curly hair', 'image', 'image/jpeg', 1800, 1200, 216727, array['hero']);`);
 const M = (file) => `(select id from public.media where filename = ${q(file)})`;
 
 // ---------------------------------------------------------------------------
@@ -547,9 +549,11 @@ sql(`insert into public.menus (key, name, items) values\n${Object.entries(menus)
 const page = (slug, title, kind, body, seo) => sql(`insert into public.pages (slug, title, kind, status, body, seo_description, published_at) values (${q(slug)}, ${q(title)}, ${q(kind)}, 'published', ${q(body)}, ${q(seo)}, now());`);
 page('home', 'Home', 'home', null, 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted in Lagos and delivered worldwide.');
 const sections = [
-  ['hero', 'Hero', { eyebrow: 'Luxury Hair House · Lagos', heading: 'Luxury hair. Beautifully yours.', text: 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted for effortless beauty.',
-    media: { kind: 'image', url: '/demo/hero.svg', alt: 'Flowing hair strands in champagne gold on emerald' }, mobile_media: { kind: 'image', url: '/demo/hero-mobile.svg', alt: '' },
-    ctas: [{ label: 'Shop wigs', href: '/wigs', style: 'primary' }, { label: 'Shop hair', href: '/hair', style: 'secondary' }], align: 'left', height: 'tall', overlay: 0.25, theme: 'dark' }],
+  ['hero', 'Hero', { layout: 'split', font: 'editorial', eyebrow: 'Luxury Hair House · Lagos', heading: 'Luxury hair. *Beautifully* yours.', text: 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted for effortless beauty.',
+    media: { kind: 'image', url: '/hero/hero-curly.jpg', alt: 'Model wearing voluminous curly hair' }, focal: '50% 20%',
+    ctas: [{ label: 'Shop wigs', href: '/wigs', style: 'primary' }, { label: 'Shop hair', href: '/hair', style: 'secondary' }],
+    trust: [{ text: 'Hand-finished in Lagos' }, { text: 'Virgin & single-donor hair' }, { text: 'Tracked worldwide shipping' }],
+    feature_product: 'burmese-curly', feature_eyebrow: 'Worn here · New', theme: 'dark' }],
   ['category_grid', 'Featured categories', { heading: 'Find your hair', eyebrow: 'Shop', items: [
     { label: 'Ready-to-Wear', href: '/wigs/ready-to-wear', image: '/demo/body-wave-2.svg' }, { label: 'Custom Units', href: '/services/custom-units', image: '/demo/custom-unit.svg' },
     { label: 'Virgin Hair', href: '/hair/virgin-hair', image: '/demo/body-wave-1.svg' }, { label: 'Donor Hair', href: '/hair/donor-hair', image: '/demo/straight-3.svg' }], layout: 'grid-4' }],

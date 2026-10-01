@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import type { ProductCardData } from '@/lib/types';
-import { Media } from '@/components/ui/media';
+import { Media, MediaThumb } from '@/components/ui/media';
 import { useStore } from '@/components/store/store-provider';
 
 export function BoughtTogether({ main, items }: { main: ProductCardData; items: ProductCardData[] }) {
@@ -27,7 +27,7 @@ export function BoughtTogether({ main, items }: { main: ProductCardData; items: 
           {all.map((p, i) => (
             <div key={p.id} className="flex items-center gap-3">
               {i > 0 && <Plus size={16} className="shrink-0 text-muted" />}
-              <Link href={`/products/${p.slug}`} className="relative block h-36 w-28 shrink-0 overflow-hidden bg-panel md:h-44 md:w-36"><Media src={p.images[0]?.url} alt={p.name} fill sizes="144px" /></Link>
+              <Link href={`/products/${p.slug}`} className="relative block h-36 w-28 shrink-0 overflow-hidden bg-panel md:h-44 md:w-36"><MediaThumb item={p.images[0]} alt={p.name} fill sizes="144px" /></Link>
             </div>
           ))}
         </div>

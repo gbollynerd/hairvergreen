@@ -5,6 +5,7 @@ import { Media, Video } from '@/components/ui/media';
 import { Reveal } from '@/components/ui/reveal';
 import { Stars } from '@/components/ui/stars';
 import { ProductCard } from '@/components/store/product-card';
+import { Price } from '@/components/store/price';
 import { NewsletterForm } from '@/components/store/newsletter-form';
 import { Accordion } from '@/components/ui/accordion';
 import { ProductRail } from './product-rail';
@@ -50,13 +51,92 @@ function Cta({ cta, dark, className }: { cta?: { label?: string; href?: string; 
 }
 
 // ---------------------------------------------------------------------------
+/** Renders *word* in a heading as an italic accent (e.g. "Luxury hair. *Beautifully* yours."). */
+function accentText(text: string, accentClass: string) {
+  return text.split(/(\*[^*]+\*)/g).filter(Boolean).map((part, i) =>
+    part.startsWith('*') && part.endsWith('*') ? <em key={i} className={cn('italic', accentClass)}>{part.slice(1, -1)}</em> : <span key={i}>{part}</span>);
+}
+
+async function HeroSplit({ s }: { s: S }) {
+  const m = s.media ?? {}; const mm = s.mobile_media ?? {};
+  const editorial = (s.font ?? 'editorial') === 'editorial';
+  const trust: string[] = (Array.isArray(s.trust) ? s.trust : []).map((t: S) => (typeof t === 'string' ? t : t?.text)).filter(Boolean);
+  const f = { product: s.feature_product, eyebrow: s.feature_eyebrow, title: s.feature_title, price_label: s.feature_price_label, href: s.feature_href };
+  const featured = f.product ? (await productsBySlugs([f.product]))[0] : null;
+  const fTitle = f.title || featured?.name;
+  const fHref = f.href || (featured ? `/products/${featured.slug}` : null);
+  const pos = s.focal || '50% 20%';
+  const photo = (item: S, cls: string, sizes: string) => item.kind === 'video' && item.url
+    ? <Video src={item.url} poster={item.poster} className={cls} />
+    : item.url ? <Media src={item.url} alt={item.alt ?? ''} fill priority sizes={sizes} className={cn('animate-[fade-in_1.6s_ease]', cls)} style={{ objectPosition: pos }} /> : null;
+
+  const featureCard = fTitle && fHref && (
+    <Link href={fHref} className="group/feat flex items-center gap-5 bg-[#F4EFE6]/95 px-5 py-4 text-primary backdrop-blur-md transition-colors hover:bg-[#F4EFE6]">
+      <span className="flex min-w-0 flex-col gap-1">
+        {f.eyebrow && <span className="text-[11px] uppercase tracking-[0.22em] text-[#7A6A45]">{f.eyebrow}</span>}
+        <span className={cn('truncate text-[17px] md:text-[19px]', editorial ? 'font-editorial' : 'font-display')}>{fTitle}</span>
+        {f.price_label ? <span className="text-[13px] text-[#3D5A4E]">{f.price_label}</span>
+          : featured && <Price amount={featured.price_min} from={featured.price_max > featured.price_min} size="sm" className="!text-[13px] !text-[#3D5A4E]" />}
+      </span>
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-primary transition-transform group-hover/feat:translate-x-1" aria-hidden><ArrowRight size={15} strokeWidth={1.4} /></span>
+    </Link>
+  );
+
+  return (
+    <section className={cn('relative overflow-hidden bg-primary text-primary-contrast md:grid md:min-h-[min(860px,100svh)] md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]', s.hide_on_mobile && 'max-md:hidden')} aria-label={s.heading?.replace(/\*/g, '') || 'Hero'}>
+      {/* Picture: right half on desktop; full-bleed behind the text on phones */}
+      <div className="relative h-[58svh] min-h-[360px] md:order-2 md:h-auto md:min-h-[520px]">
+        {photo(m, cn(mm.url && 'max-md:hidden', 'saturate-[.92] contrast-[1.04]'), '(min-width:768px) 55vw, 100vw')}
+        {mm.url && photo(mm, 'md:hidden', '100vw')}
+        {/* emerald fades: from the text side on desktop, from the bottom on phones */}
+        <div className="absolute inset-0 hidden md:block" style={{ background: 'linear-gradient(90deg, var(--hg-primary) 0%, color-mix(in srgb, var(--hg-primary) 55%, transparent) 14%, transparent 38%)' }} />
+        <div className="absolute inset-0 hidden md:block" style={{ background: 'linear-gradient(0deg, color-mix(in srgb, var(--hg-primary) 55%, transparent) 0%, transparent 30%)' }} />
+        <div className="absolute inset-0 md:hidden" style={{ background: 'linear-gradient(180deg, transparent 55%, color-mix(in srgb, var(--hg-primary) 70%, transparent) 82%, var(--hg-primary) 100%)' }} />
+        {featureCard && <div className="absolute bottom-[clamp(16px,3vw,40px)] right-[clamp(16px,3vw,40px)] hidden max-w-[calc(100%-32px)] animate-fade-up [animation-delay:600ms] md:block">{featureCard}</div>}
+      </div>
+
+      {/* Copy */}
+      <div className="relative z-10 -mt-16 flex flex-col gap-6 px-6 pb-12 md:order-1 md:mt-0 md:justify-center md:gap-7 md:px-[clamp(24px,6vw,96px)] md:py-24">
+        {s.eyebrow && (
+          <p className="flex items-center gap-3.5 text-[11px] uppercase tracking-[0.28em] text-accent animate-fade-up md:text-[12px]">
+            <span className="h-px w-9 bg-accent" aria-hidden />{s.eyebrow}
+          </p>
+        )}
+        {s.heading && (
+          <h1 className={cn('text-balance leading-none tracking-[-0.015em] animate-fade-up [animation-delay:120ms]', editorial ? 'font-editorial text-[clamp(44px,6.2vw,92px)]' : 'display-1')}>
+            {accentText(s.heading, 'text-accent')}
+          </h1>
+        )}
+        {s.text && <p className="max-w-[440px] text-pretty text-[16px] leading-[1.6] text-primary-contrast/80 animate-fade-up [animation-delay:240ms] md:text-[17px]">{s.text}</p>}
+        {Array.isArray(s.ctas) && s.ctas.length > 0 && (
+          <div className="mt-1 flex flex-wrap gap-3 animate-fade-up [animation-delay:360ms]">
+            {s.ctas.filter((c: S) => c?.href && c?.label).map((c: S, i: number) => (
+              <Link key={i} href={c.href} className={cn('inline-flex h-[52px] items-center px-8 text-[13px] font-medium uppercase tracking-[0.18em] transition-colors',
+                (c.style ?? (i === 0 ? 'primary' : 'secondary')) === 'primary'
+                  ? 'bg-accent text-primary hover:bg-[color-mix(in_srgb,var(--hg-accent)_88%,white)]'
+                  : 'border border-accent/60 text-primary-contrast hover:border-accent hover:bg-primary-contrast/5')}>{c.label}</Link>
+            ))}
+          </div>
+        )}
+        {featureCard && <div className="mt-2 md:hidden">{featureCard}</div>}
+        {trust.length > 0 && (
+          <ul className="mt-4 flex flex-wrap gap-x-7 gap-y-2 border-t border-primary-contrast/15 pt-6 text-[13px] tracking-[0.04em] text-primary-contrast/65 animate-fade-up [animation-delay:480ms] md:mt-10">
+            {trust.map((t, i) => <li key={i}>{t}</li>)}
+          </ul>
+        )}
+      </div>
+    </section>
+  );
+}
+
 async function Hero({ s }: { s: S }) {
+  if (s.layout === 'split') return HeroSplit({ s });
   const dark = s.theme !== 'light';
   const h = { tall: 'min-h-[88svh] md:min-h-[86vh]', medium: 'min-h-[62vh]', short: 'min-h-[44vh]' }[(s.height as string) || 'tall'];
   const align = { left: 'items-end md:items-center justify-start text-left', center: 'items-center justify-center text-center', right: 'items-end md:items-center justify-end text-left' }[(s.align as string) || 'left'];
   const m = s.media ?? {}; const mm = s.mobile_media ?? {};
   return (
-    <section className={cn('relative flex overflow-hidden', h, dark ? 'bg-primary text-primary-contrast' : 'bg-panel text-ink', s.hide_on_mobile && 'max-md:hidden')}>
+    <section aria-label={s.heading?.replace(/\*/g, '') || 'Hero'} className={cn('relative flex overflow-hidden', h, dark ? 'bg-primary text-primary-contrast' : 'bg-panel text-ink', s.hide_on_mobile && 'max-md:hidden')}>
       <div className="absolute inset-0">
         {m.kind === 'video' && m.url ? <Video src={m.url} poster={m.poster} className={cn(mm.url && 'max-md:hidden')} />
           : m.url ? <Media src={m.url} alt={m.alt ?? ''} fill priority sizes="100vw" className={cn('animate-[fade-in_1.6s_ease]', mm.url && 'max-md:hidden')} /> : null}
@@ -66,7 +146,7 @@ async function Hero({ s }: { s: S }) {
       <div className={cn('container-x relative z-10 flex w-full py-16 md:py-24', align)}>
         <div className={cn('max-w-[720px]', s.align === 'center' && 'mx-auto flex flex-col items-center')}>
           {s.eyebrow && <p className={cn('eyebrow animate-fade-up', dark && '!text-accent')}>{s.eyebrow}</p>}
-          {s.heading && <h1 className="display-1 mt-5 animate-fade-up [animation-delay:120ms]">{s.heading}</h1>}
+          {s.heading && <h1 className="display-1 mt-5 animate-fade-up [animation-delay:120ms]">{accentText(s.heading, dark ? 'text-accent' : 'text-accent-strong')}</h1>}
           {s.text && <p className={cn('mt-6 max-w-xl text-[17px] leading-8 animate-fade-up [animation-delay:240ms]', dark ? 'text-primary-contrast/80' : 'text-muted')}>{s.text}</p>}
           {Array.isArray(s.ctas) && s.ctas.length > 0 && (
             <div className={cn('mt-9 flex flex-wrap gap-3 animate-fade-up [animation-delay:360ms]', s.align === 'center' && 'justify-center')}>

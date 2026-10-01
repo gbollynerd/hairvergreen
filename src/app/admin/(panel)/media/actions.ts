@@ -67,8 +67,8 @@ export async function deleteMedia(ids: string[], force = false): Promise<ActionR
         if (used.length) return { error: `In use (${used.map((u) => `${u.count} ${u.label}`).join(', ')}). Replace or remove it there first, or delete anyway.` };
       }
     }
-    const { data: rows } = await db.from('media').select('id, bucket, path, filename').in('id', valid);
-    const paths = (rows ?? []).filter((r) => r.path && r.bucket === 'media').map((r) => r.path as string);
+    const { data: rows } = await db.from('media').select('id, bucket, path, filename, metadata').in('id', valid);
+    const paths = (rows ?? []).filter((r) => r.bucket === 'media').flatMap((r) => [r.path, (r.metadata as { poster_path?: string } | null)?.poster_path]).filter((x): x is string => !!x);
     if (paths.length) await db.storage.from('media').remove(paths);
     await db.from('media').delete().in('id', valid);
     await audit(staff, { action: 'delete', entityType: 'media', summary: `Deleted ${valid.length} file(s)`, before: rows });
@@ -78,7 +78,7 @@ export async function deleteMedia(ids: string[], force = false): Promise<ActionR
 }
 
 /** Swap the file behind a media item. Everything that references it by id updates automatically; URL mentions in sections, menus and journal bodies are rewritten. */
-export async function replaceMediaFile(id: string, file: { path: string; mime_type: string; size_bytes: number; filename: string; width?: number; height?: number }): Promise<ActionResult> {
+export async function replaceMediaFile(id: string, file: { path: string; mime_type: string; size_bytes: number; filename: string; width?: number; height?: number; poster_path?: string; duration_seconds?: number }): Promise<ActionResult> {
   return guarded('media.upload', async (staff) => {
     if (!isUuid(id) || !file.path.startsWith('library/') || file.path.includes('..')) return { error: 'Invalid upload' };
     const db = supabaseAdmin();
@@ -86,7 +86,11 @@ export async function replaceMediaFile(id: string, file: { path: string; mime_ty
     if (!before) return { error: 'Media not found' };
     const url = db.storage.from('media').getPublicUrl(file.path).data.publicUrl;
     const kind = file.mime_type.startsWith('video/') ? 'video' : file.mime_type.startsWith('image/') ? 'image' : 'file';
-    await db.from('media').update({ path: file.path, url, kind, mime_type: file.mime_type, filename: file.filename.slice(0, 200), size_bytes: file.size_bytes, width: file.width ?? null, height: file.height ?? null, updated_at: new Date().toISOString() }).eq('id', id);
+    const posterPath = file.poster_path && file.poster_path.startsWith('library/') && !file.poster_path.includes('..') ? file.poster_path : null;
+    const metadata = { ...((before.metadata as Record<string, unknown>) ?? {}), poster: posterPath ? db.storage.from('media').getPublicUrl(posterPath).data.publicUrl : null, poster_path: posterPath };
+    await db.from('media').update({ path: file.path, url, kind, mime_type: file.mime_type, filename: file.filename.slice(0, 200), size_bytes: file.size_bytes, width: file.width ?? null, height: file.height ?? null, duration_seconds: file.duration_seconds ?? null, metadata, updated_at: new Date().toISOString() }).eq('id', id);
+    const oldPoster = (before.metadata as { poster_path?: string } | null)?.poster_path;
+    if (oldPoster && oldPoster !== posterPath) await db.storage.from('media').remove([oldPoster]);
     // Rewrite URL mentions
     const oldUrl = before.url as string;
     const swap = (v: unknown) => JSON.parse(JSON.stringify(v).split(JSON.stringify(oldUrl).slice(1, -1)).join(JSON.stringify(url).slice(1, -1)));
@@ -130,5 +134,27 @@ export async function deleteFolder(id: string): Promise<ActionResult> {
     await supabaseAdmin().from('media_folders').delete().eq('id', id);
     await audit(staff, { action: 'delete', entityType: 'media_folder', entityId: id, summary: 'Deleted folder (files kept)' });
     return { ok: true, message: 'Folder deleted — its files are kept', redirect: '/admin/media' };
+  });
+}
+
+/** Attach (or replace) the thumbnail image shown for a video before it plays. */
+export async function setVideoPoster(id: string, posterPath: string, info?: { width?: number; height?: number; duration_seconds?: number }): Promise<ActionResult> {
+  return guarded('media.upload', async (staff) => {
+    if (!isUuid(id) || !posterPath.startsWith('library/') || posterPath.includes('..')) return { error: 'Invalid thumbnail' };
+    const db = supabaseAdmin();
+    const { data: m } = await db.from('media').select('id, kind, metadata').eq('id', id).single();
+    if (!m || m.kind !== 'video') return { error: 'Thumbnails can only be set on videos' };
+    const meta = (m.metadata as Record<string, unknown>) ?? {};
+    const old = meta.poster_path as string | undefined;
+    const poster = db.storage.from('media').getPublicUrl(posterPath).data.publicUrl;
+    const patch: Record<string, unknown> = { metadata: { ...meta, poster, poster_path: posterPath }, updated_at: new Date().toISOString() };
+    if (info?.width) patch.width = info.width;
+    if (info?.height) patch.height = info.height;
+    if (info?.duration_seconds) patch.duration_seconds = info.duration_seconds;
+    await db.from('media').update(patch).eq('id', id);
+    if (old && old !== posterPath) await db.storage.from('media').remove([old]);
+    await audit(staff, { action: 'update', entityType: 'media', entityId: id, summary: 'Set video thumbnail' });
+    refreshStore('all');
+    return { ok: true, message: 'Thumbnail saved' };
   });
 }

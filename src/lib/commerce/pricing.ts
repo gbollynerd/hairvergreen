@@ -62,7 +62,7 @@ export async function buildQuote(input: CartInputLine[], ctx: QuoteContext = {})
     ? await db.from('products').select(`id, name, slug, product_type, status, publish_at, weight_grams, category_id, requires_review,
         categories:category_id (id, parent_id),
         collection_products (collection_id),
-        product_media (sort, option_match, media:media_id (url)),
+        product_media (sort, option_match, media:media_id (url, kind, metadata)),
         bundles (pricing_mode, value, bundle_items!bundle_items_bundle_product_id_fkey (id, product_id, variant_id, quantity, is_optional, label, sort))`)
       .in('id', productIds)
     : { data: [] as any[] };
@@ -78,7 +78,7 @@ export async function buildQuote(input: CartInputLine[], ctx: QuoteContext = {})
     }
   }
   const { data: vars } = variantIds.size
-    ? await db.from('product_variants').select('*, product:product_id (id, name, slug, status, weight_grams, product_media (sort, option_match, media:media_id (url)))').in('id', [...variantIds])
+    ? await db.from('product_variants').select('*, product:product_id (id, name, slug, status, weight_grams, product_media (sort, option_match, media:media_id (url, kind, metadata)))').in('id', [...variantIds])
     : { data: [] as any[] };
   const vmap = new Map((vars ?? []).map((v: any) => [v.id, v]));
 
@@ -87,8 +87,10 @@ export async function buildQuote(input: CartInputLine[], ctx: QuoteContext = {})
 
   const pickImage = (p: any, opts: Record<string, string>) => {
     const media = [...(p?.product_media ?? [])].sort((a: any, b: any) => a.sort - b.sort);
-    const match = media.find((m: any) => Object.entries(m.option_match || {}).length && Object.entries(m.option_match).every(([k, v]) => opts[k] === v));
-    return (match ?? media[0])?.media?.url ?? null;
+    // Line items need a still: images as-is, videos via their thumbnail; skip videos without one.
+    const still = (m: any) => (m?.media?.kind === 'video' ? m.media.metadata?.poster ?? null : m?.media?.url ?? null);
+    const match = media.find((m: any) => Object.entries(m.option_match || {}).length && Object.entries(m.option_match).every(([k, v]) => opts[k] === v) && still(m));
+    return still(match) ?? media.map(still).find(Boolean) ?? null;
   };
 
   const now = new Date().toISOString();

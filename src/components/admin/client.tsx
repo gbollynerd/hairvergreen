@@ -126,7 +126,7 @@ export function TagsInput({ name, defaultValue = [], placeholder = 'Add and pres
 // ---------------------------------------------------------------------------
 // Media picker (reads the library through /api/admin/media)
 // ---------------------------------------------------------------------------
-export type PickedMedia = { id: string; url: string; alt: string; kind: string };
+export type PickedMedia = { id: string; url: string; alt: string; kind: string; metadata?: { poster?: string | null } | null };
 
 export function MediaPicker({ open, onClose, onPick, multiple, kind }: { open: boolean; onClose: () => void; onPick: (m: PickedMedia[]) => void; multiple?: boolean; kind?: 'image' | 'video' }) {
   const [items, setItems] = useState<PickedMedia[]>([]);
@@ -158,7 +158,7 @@ export function MediaPicker({ open, onClose, onPick, multiple, kind }: { open: b
           return (
             <button key={m.id} type="button" onClick={() => setSel(multiple ? (on ? sel.filter((x) => x !== m.id) : [...sel, m.id]) : [m.id])}
               className={cn('relative aspect-square overflow-hidden bg-panel ring-offset-2', on && 'ring-2 ring-primary')} title={m.alt}>
-              {m.kind === 'video' ? <video src={m.url} className="h-full w-full object-cover" muted /> : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt={m.alt} className="h-full w-full object-cover" loading="lazy" />}
+              {m.kind === 'video' ? (m.metadata?.poster ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.metadata.poster} alt={m.alt} className="h-full w-full object-cover" loading="lazy" /> : <video src={`${m.url}#t=0.5`} className="h-full w-full object-cover" muted preload="metadata" />) : /* eslint-disable-next-line @next/next/no-img-element */ <img src={m.url} alt={m.alt} className="h-full w-full object-cover" loading="lazy" />}
               {on && <span className="absolute right-1 top-1 grid h-6 w-6 place-items-center bg-primary text-primary-contrast"><Check size={14} /></span>}
             </button>
           );
@@ -172,18 +172,39 @@ export function MediaPicker({ open, onClose, onPick, multiple, kind }: { open: b
   );
 }
 
-/** Upload a file into the public media library (signed upload, then register the row). */
+/** Upload a file to storage through a signed URL; returns the storage path. */
+async function signedUpload(file: Blob, filename: string, contentType: string): Promise<string> {
+  const s = await fetch('/api/admin/media/sign', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ filename, contentType, size: file.size }) });
+  const sd = await s.json(); if (!s.ok) throw new Error(sd.error || 'Upload failed');
+  const { supabaseBrowser } = await import('@/lib/supabase/client');
+  const { error } = await supabaseBrowser().storage.from('media').uploadToSignedUrl(sd.path, sd.token, file, { contentType, upsert: false });
+  if (error) throw new Error(error.message);
+  return sd.path as string;
+}
+
+/** For videos: capture a thumbnail frame and upload it. Never blocks the main upload if it fails. */
+export async function uploadVideoPoster(source: File | string, name: string) {
+  try {
+    const { captureVideoPoster } = await import('@/lib/video-poster');
+    const p = await captureVideoPoster(source);
+    const path = await signedUpload(p.blob, `${name.replace(/\.[^.]+$/, '')}-thumbnail.jpg`, 'image/jpeg');
+    return { poster_path: path, width: p.width, height: p.height, duration: Math.round(p.duration * 10) / 10 };
+  } catch (e) {
+    console.warn('[media] thumbnail not created', e);
+    return null;
+  }
+}
+
+/** Upload a file into the public media library (signed upload, then register the row). Videos get an automatic thumbnail. */
 export async function uploadToLibrary(file: File, folderId?: string | null): Promise<PickedMedia> {
   const dims = await new Promise<{ width?: number; height?: number }>((res) => {
     if (!file.type.startsWith('image/')) return res({});
     const img = new Image(); img.onload = () => res({ width: img.naturalWidth, height: img.naturalHeight }); img.onerror = () => res({}); img.src = URL.createObjectURL(file);
   });
-  const s = await fetch('/api/admin/media/sign', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ filename: file.name, contentType: file.type, size: file.size }) });
-  const sd = await s.json(); if (!s.ok) throw new Error(sd.error || 'Upload failed');
-  const { supabaseBrowser } = await import('@/lib/supabase/client');
-  const { error } = await supabaseBrowser().storage.from('media').uploadToSignedUrl(sd.path, sd.token, file, { contentType: file.type, upsert: false });
-  if (error) throw new Error(error.message);
-  const r = await fetch('/api/admin/media', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path: sd.path, filename: file.name, mime_type: file.type, size_bytes: file.size, folder_id: folderId ?? null, ...dims }) });
+  const isVideo = file.type.startsWith('video/');
+  const [path, poster] = await Promise.all([signedUpload(file, file.name, file.type), isVideo ? uploadVideoPoster(file, file.name) : Promise.resolve(null)]);
+  const extra = poster ? { poster_path: poster.poster_path, width: poster.width, height: poster.height, duration_seconds: poster.duration } : dims;
+  const r = await fetch('/api/admin/media', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ path, filename: file.name, mime_type: file.type, size_bytes: file.size, folder_id: folderId ?? null, ...extra }) });
   const rd = await r.json(); if (!r.ok) throw new Error(rd.error || 'Could not save');
   return rd.item;
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Minus, Plus, Truck, Tag, X } from 'lucide-react';
 import { useStore } from './store-provider';
 import { Dialog } from '@/components/ui/dialog';
-import { Media } from '@/components/ui/media';
+import { Media, MediaThumb } from '@/components/ui/media';
 import { track } from '@/lib/analytics-client';
 import type { ProductCardData } from '@/lib/types';
 import type { PricedLine } from '@/lib/commerce/pricing';
@@ -86,7 +86,7 @@ export function CartDrawer() {
               {recs.map((p) => (
                 <li key={p.id} className="text-[13px]">
                   <Link href={`/products/${p.slug}`} onClick={() => setCartOpen(false)} className="block">
-                    <div className="relative aspect-[4/5] bg-panel"><Media src={p.images[0]?.url} alt={p.name} fill sizes="180px" /></div>
+                    <div className="relative aspect-[4/5] bg-panel"><MediaThumb item={p.images[0]} alt={p.name} fill sizes="180px" /></div>
                     <p className="mt-2 font-display text-[15px] leading-snug">{p.name}</p>
                   </Link>
                   <div className="flex items-center justify-between">

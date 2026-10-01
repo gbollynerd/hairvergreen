@@ -14,7 +14,7 @@ export default async function Products({ searchParams }: PageProps<'/admin/produ
   const page = Math.max(1, Number(sp.page) || 1);
   const db = supabaseAdmin();
   const q = typeof sp.q === 'string' ? sp.q.trim().replace(/[%,()]/g, '') : '';
-  let query = db.from('products').select('id, name, slug, status, product_type, price, is_featured, updated_at, category:category_id (name), product_media (sort, media:media_id (url)), product_variants (id, stock_on_hand, stock_reserved, track_inventory, is_active)', { count: 'exact' })
+  let query = db.from('products').select('id, name, slug, status, product_type, price, is_featured, updated_at, category:category_id (name), product_media (sort, media:media_id (url, kind, metadata)), product_variants (id, stock_on_hand, stock_reserved, track_inventory, is_active)', { count: 'exact' })
     .order('updated_at', { ascending: false }).range((page - 1) * PER, page * PER - 1);
   if (q) query = query.or(`name.ilike.%${q}%,sku.ilike.%${q}%,slug.ilike.%${q}%`);
   if (typeof sp.status === 'string' && sp.status) query = query.eq('status', sp.status);
@@ -23,7 +23,7 @@ export default async function Products({ searchParams }: PageProps<'/admin/produ
   const [{ data, count }, { data: cats }] = await Promise.all([query, db.from('categories').select('id, name').order('sort')]);
   const rows = (data ?? []).map((p: any) => ({
     id: p.id, name: p.name, slug: p.slug, status: p.status, type: p.product_type, price: p.price, category: p.category?.name ?? '—', featured: p.is_featured,
-    image: [...(p.product_media ?? [])].sort((a: any, b: any) => a.sort - b.sort)[0]?.media?.url ?? null,
+    image: [...(p.product_media ?? [])].sort((a: any, b: any) => a.sort - b.sort).map((m: any) => (m.media?.kind === 'video' ? m.media.metadata?.poster : m.media?.url)).find(Boolean) ?? null,
     variants: (p.product_variants ?? []).filter((v: any) => v.is_active).length,
     stock: (p.product_variants ?? []).filter((v: any) => v.track_inventory && v.is_active).reduce((s: number, v: any) => s + v.stock_on_hand - v.stock_reserved, 0),
     tracked: (p.product_variants ?? []).some((v: any) => v.track_inventory), updated_at: p.updated_at,

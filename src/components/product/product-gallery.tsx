@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Expand, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Expand, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import type { ProductMedia } from '@/lib/types';
-import { Media, Video } from '@/components/ui/media';
+import { Media, MediaThumb } from '@/components/ui/media';
 import { Dialog } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -42,9 +42,10 @@ export function ProductGallery({ media, selection, name, compact }: { media: Pro
       {!compact && items.length > 1 && (
         <div className="order-2 flex gap-2 overflow-x-auto scrollbar-none md:order-1 md:flex-col md:overflow-visible" role="tablist" aria-label="Product images">
           {items.map((m, i) => (
-            <button key={m.id} type="button" role="tab" aria-selected={i === idx} aria-label={`Image ${i + 1} of ${items.length}`} onClick={() => goTo(i)}
+            <button key={m.id} type="button" role="tab" aria-selected={i === idx} aria-label={`${m.media.kind === 'video' ? 'Video' : 'Image'} ${i + 1} of ${items.length}`} onClick={() => goTo(i)}
               className={cn('relative aspect-[4/5] w-16 shrink-0 overflow-hidden bg-panel transition-opacity md:w-full', i === idx ? 'ring-1 ring-primary' : 'opacity-70 hover:opacity-100')}>
-              <Media src={m.media.url} alt="" fill sizes="80px" />
+              <MediaThumb item={{ url: m.media.url, kind: m.media.kind, poster: m.media.metadata?.poster }} alt="" sizes="80px" />
+              {m.media.kind === 'video' && <PlayBadge />}
             </button>
           ))}
         </div>
@@ -53,7 +54,7 @@ export function ProductGallery({ media, selection, name, compact }: { media: Pro
         <div ref={track} onScroll={onScroll} className="flex snap-x snap-mandatory overflow-x-auto scrollbar-none" aria-live="polite">
           {items.map((m, i) => (
             <div key={m.id} className="relative aspect-[4/5] w-full shrink-0 snap-center overflow-hidden bg-panel">
-              {m.media.kind === 'video' ? <Video src={m.media.url} /> : (
+              {m.media.kind === 'video' ? <SlideVideo src={m.media.url} poster={m.media.metadata?.poster} active={i === idx} /> : (
                 <button type="button" className="absolute inset-0 cursor-zoom-in" onClick={() => { setIdx(i); setZoom(true); }} aria-label={`Open image ${i + 1} fullscreen`}>
                   <Media src={m.media.url} alt={m.alt || m.media.alt || name} fill priority={i === 0 && !compact} sizes="(min-width:1024px) 55vw, 100vw" />
                 </button>
@@ -98,17 +99,37 @@ function ZoomViewer({ items, start, name }: { items: ProductMedia[]; start: numb
       <div className="relative flex-1 overflow-hidden" onMouseMove={(e) => { const r = e.currentTarget.getBoundingClientRect(); setOrigin(`${((e.clientX - r.left) / r.width) * 100}% ${((e.clientY - r.top) / r.height) * 100}%`); }}>
         <button type="button" className={cn('absolute inset-0', z ? 'cursor-zoom-out' : 'cursor-zoom-in')} onClick={() => setZ((v) => !v)} aria-label={z ? 'Zoom out' : 'Zoom in'}>
           <div className="absolute inset-0 transition-transform duration-500" style={{ transform: z ? 'scale(2.2)' : 'none', transformOrigin: origin }}>
-            {m.media.kind === 'video' ? <Video src={m.media.url} className="object-contain" /> : <Media src={m.media.url} alt={m.alt || m.media.alt || name} fill sizes="100vw" className="!object-contain" />}
+            {m.media.kind === 'video' ? <video src={m.media.url} poster={m.media.metadata?.poster ?? undefined} controls autoPlay muted loop playsInline className="h-full w-full object-contain" onClick={(e) => e.stopPropagation()} /> : <Media src={m.media.url} alt={m.alt || m.media.alt || name} fill sizes="100vw" className="!object-contain" />}
           </div>
         </button>
       </div>
       <div className="flex items-center justify-center gap-2 border-t border-line p-3">
         {items.map((x, n) => (
           <button key={x.id} type="button" onClick={() => { setI(n); setZ(false); }} className={cn('relative h-16 w-12 overflow-hidden bg-panel', n === i ? 'ring-1 ring-primary' : 'opacity-60')} aria-label={`Image ${n + 1}`}>
-            <Media src={x.media.url} alt="" fill sizes="48px" />
+            <MediaThumb item={{ url: x.media.url, kind: x.media.kind, poster: x.media.metadata?.poster }} alt="" sizes="48px" />
+            {x.media.kind === 'video' && <PlayBadge small />}
           </button>
         ))}
       </div>
     </div>
   );
+}
+
+function PlayBadge({ small }: { small?: boolean }) {
+  return (
+    <span className="pointer-events-none absolute inset-0 grid place-items-center" aria-hidden>
+      <span className={cn('grid place-items-center rounded-full bg-surface/85 text-ink', small ? 'h-5 w-5' : 'h-7 w-7')}><Play size={small ? 9 : 12} fill="currentColor" className="ml-0.5" /></span>
+    </span>
+  );
+}
+
+/** Gallery video: shows its thumbnail, plays muted while it is the visible slide, pauses otherwise. */
+function SlideVideo({ src, poster, active }: { src: string; poster?: string | null; active: boolean }) {
+  const ref = useRef<HTMLVideoElement>(null);
+  useEffect(() => {
+    const v = ref.current; if (!v) return;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (active && !reduced) v.play().catch(() => {}); else v.pause();
+  }, [active]);
+  return <video ref={ref} src={poster ? src : `${src}#t=0.5`} poster={poster ?? undefined} muted loop playsInline controls preload="metadata" className="h-full w-full object-cover" />;
 }

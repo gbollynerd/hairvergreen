@@ -34,10 +34,21 @@ const PRODUCT_PICK: SField[] = [
 export const SECTION_SCHEMA: Record<string, { label: string; description: string; fields: SField[]; defaults: Record<string, unknown> }> = {
   hero: {
     label: 'Hero banner', description: 'Full-bleed image or video with heading and buttons.',
-    fields: [...HEAD, { key: 'media', label: 'Image or video', type: 'media' }, { key: 'mobile_media', label: 'Mobile image (optional)', type: 'media' }, { key: 'ctas', label: 'Buttons', type: 'ctas' },
-      { key: 'align', label: 'Text alignment', type: 'select', options: [['left', 'Left'], ['center', 'Centre'], ['right', 'Right']] },
-      { key: 'height', label: 'Height', type: 'select', options: [['tall', 'Tall'], ['medium', 'Medium'], ['short', 'Short']] },
-      { key: 'overlay', label: 'Image darkening (0–0.8)', type: 'number' }, THEME],
+    fields: [
+      { key: 'layout', label: 'Layout', type: 'select', options: [['overlay', 'Text over full-width image'], ['split', 'Split — text panel left, photo right']] },
+      HEAD[0], { key: 'heading', label: 'Heading', type: 'text', hint: 'Wrap words in *asterisks* to set them in gold italic, e.g. Luxury hair. *Beautifully* yours.' }, HEAD[2],
+      { key: 'media', label: 'Image or video', type: 'media' }, { key: 'mobile_media', label: 'Mobile image (optional)', type: 'media' },
+      { key: 'focal', label: 'Photo focus point (split layout)', type: 'text', placeholder: '50% 20%', hint: 'Horizontal and vertical position to keep in frame when the photo is cropped' },
+      { key: 'ctas', label: 'Buttons', type: 'ctas' },
+      { key: 'font', label: 'Heading font (split layout)', type: 'select', options: [['editorial', 'Bodoni Moda (editorial)'], ['display', 'Brand display font']] },
+      { key: 'trust', label: 'Trust points (split layout)', type: 'list', addLabel: 'Add point', fields: [{ key: 'text', label: 'Text', wide: true }] },
+      { key: 'feature_product', label: 'Featured product card — product URL slug', type: 'text', placeholder: 'burmese-curly', hint: 'Shows the product name and price on the photo (split layout). Leave empty to hide.' },
+      { key: 'feature_eyebrow', label: 'Featured card label', type: 'text', placeholder: 'Worn here · New' },
+      { key: 'feature_title', label: 'Featured card title (optional override)', type: 'text' },
+      { key: 'feature_price_label', label: 'Featured card price text (optional override)', type: 'text', placeholder: 'From ₦95,000' },
+      { key: 'align', label: 'Text alignment (overlay layout)', type: 'select', options: [['left', 'Left'], ['center', 'Centre'], ['right', 'Right']] },
+      { key: 'height', label: 'Height (overlay layout)', type: 'select', options: [['tall', 'Tall'], ['medium', 'Medium'], ['short', 'Short']] },
+      { key: 'overlay', label: 'Image darkening, 0–0.8 (overlay layout)', type: 'number' }, THEME],
     defaults: { heading: 'New hero', align: 'left', height: 'tall', overlay: 0.25, theme: 'dark', ctas: [] },
   },
   category_grid: {

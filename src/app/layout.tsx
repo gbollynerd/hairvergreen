@@ -26,6 +26,15 @@ const jost = localFont({
   ],
 });
 
+// Editorial display face used by the split hero (SIL Open Font License).
+const bodoni = localFont({
+  variable: '--font-bodoni', display: 'swap',
+  src: [
+    { path: '../fonts/bodoni-moda-latin-400-normal.woff2', weight: '400', style: 'normal' },
+    { path: '../fonts/bodoni-moda-latin-400-italic.woff2', weight: '400', style: 'italic' },
+  ],
+});
+
 export async function generateMetadata(): Promise<Metadata> {
   const s = isConfigured() ? await getSettings() : null;
   const title = s?.seo.default_title || 'Hairver Green — Luxury Hair House, Lagos';
@@ -48,7 +57,7 @@ export const viewport: Viewport = { themeColor: '#0F3D2E', width: 'device-width'
 export default async function RootLayout({ children }: LayoutProps<'/'>) {
   const s = isConfigured() ? await getSettings() : null;
   return (
-    <html lang="en" className={`${cormorant.variable} ${jost.variable}`} data-motion={s?.theme.animations === 'none' ? 'none' : 'on'} data-buttons={s?.theme.button_style === 'outline' ? 'outline' : 'solid'}>
+    <html lang="en" className={`${cormorant.variable} ${jost.variable} ${bodoni.variable}`} data-motion={s?.theme.animations === 'none' ? 'none' : 'on'} data-buttons={s?.theme.button_style === 'outline' ? 'outline' : 'solid'}>
       <head>{s && <ThemeStyle theme={s.theme} />}</head>
       <body>{children}</body>
     </html>

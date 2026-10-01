@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Search, X, ArrowRight } from 'lucide-react';
 import { useStore } from '@/components/store/store-provider';
 import { Dialog } from '@/components/ui/dialog';
-import { Media } from '@/components/ui/media';
+import { Media, MediaThumb } from '@/components/ui/media';
 import { Price } from '@/components/store/price';
 import { track } from '@/lib/analytics-client';
 import type { ProductCardData } from '@/lib/types';
@@ -90,7 +90,7 @@ export function SearchOverlay({ popular }: { popular: string[] }) {
                   {results.products.map((p) => (
                     <li key={p.id}>
                       <Link href={`/products/${p.slug}`} onClick={close} className="group block">
-                        <div className="relative aspect-[4/5] overflow-hidden bg-panel"><Media src={p.images[0]?.url} alt={p.name} fill sizes="25vw" className="zoom-on-hover" /></div>
+                        <div className="relative aspect-[4/5] overflow-hidden bg-panel"><MediaThumb item={p.images[0]} alt={p.name} fill sizes="25vw" className="zoom-on-hover" /></div>
                         <p className="mt-2 font-display text-[17px] leading-snug">{p.name}</p>
                         <Price amount={p.price_min} compareAt={p.compare_at} from={p.price_max > p.price_min} size="sm" />
                       </Link>
