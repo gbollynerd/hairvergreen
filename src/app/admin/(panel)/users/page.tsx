@@ -28,7 +28,7 @@ export default async function Staff() {
               <Td><span className="font-medium">{p.full_name || '—'}</span><span className="block text-[12px] text-muted">{p.email}</span>{p.id === staff.id && <Badge tone="blue">You</Badge>}</Td>
               <Td>{p.roleIds.map((r: string) => <span key={r} className="mr-1"><Badge tone={roleName[r] === 'Super Admin' ? 'purple' : 'gray'}>{roleName[r]}</Badge></span>)}</Td>
               <Td className="text-muted">{formatDate(p.since)}</Td>
-              <Td><RoleEditor userId={p.id} email={p.email} current={p.roleIds} roles={roles ?? []} self={p.id === staff.id} /></Td>
+              <Td><RoleEditor userId={p.id} email={p.email} name={p.full_name ?? ''} current={p.roleIds} roles={roles ?? []} self={p.id === staff.id} /></Td>
             </tr>
           ))}
         </Table>

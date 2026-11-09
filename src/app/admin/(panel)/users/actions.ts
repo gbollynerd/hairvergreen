@@ -42,6 +42,9 @@ export async function inviteStaff(_: ActionResult, fd: FormData): Promise<Action
     if (existing) userId = existing.id;
     else {
       const { data, error } = await db.auth.admin.inviteUserByEmail(email, { redirectTo: `${env.siteUrl}/auth/callback?next=/admin`, data: { full_name: name || undefined } });
+      if (error && (error.code === 'over_email_send_rate_limit' || error.status === 429)) {
+        return { error: 'Supabase’s built-in email service only sends 2 emails per hour. Wait an hour, or set up custom SMTP in Supabase (Authentication → Emails → SMTP) to remove the limit.' };
+      }
       if (error || !data?.user) return { error: `Could not send the invitation: ${error?.message ?? 'unknown error'}` };
       userId = data.user.id; invited = true;
       if (name) await db.from('profiles').update({ full_name: name }).eq('id', userId);
@@ -78,4 +81,37 @@ export async function setStaffRoles(userId: string, roleIds: string[]): Promise<
 export async function removeStaff(userId: string): Promise<ActionResult> {
   if (!isUuid(userId)) return { error: 'Invalid user' };
   return setStaffRoles(userId, []);
+}
+
+/** Edit a staff member's name and login email. Updates auth, profile and the linked customer record. */
+export async function updateStaffDetails(userId: string, fullName: string, emailRaw: string): Promise<ActionResult> {
+  return guarded('users.manage', async (staff) => {
+    if (!isUuid(userId)) return { error: 'Invalid user' };
+    const email = emailRaw.trim().toLowerCase();
+    const name = fullName.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { error: 'Enter a valid email address' };
+    const db = supabaseAdmin();
+    const { data: before } = await db.from('profiles').select('email, full_name').eq('id', userId).maybeSingle();
+    if (!before) return { error: 'Staff member not found' };
+    // You can't edit someone who holds roles more powerful than your own.
+    if (userId !== staff.id) {
+      const { data: theirRoles } = await db.from('user_roles').select('role_id').eq('user_id', userId);
+      const ids = (theirRoles ?? []).map((r) => r.role_id as string);
+      if (ids.length) await assertCanGrant(staff, ids);
+    }
+    const emailChanged = String(before.email ?? '').toLowerCase() !== email;
+    if (emailChanged) {
+      const { data: clash } = await db.from('profiles').select('id').eq('email', email).neq('id', userId).maybeSingle();
+      if (clash) return { error: 'Another account already uses that email' };
+    }
+    const { error } = await db.auth.admin.updateUserById(userId, {
+      ...(emailChanged ? { email, email_confirm: true } : {}),
+      user_metadata: { full_name: name || null },
+    });
+    if (error) return { error: `Could not update the account: ${error.message}` };
+    await db.from('profiles').update({ email, full_name: name || null }).eq('id', userId);
+    if (emailChanged) await db.from('customers').update({ email }).eq('user_id', userId);
+    await audit(staff, { action: 'update_details', entityType: 'staff', entityId: userId, summary: `Updated staff details for ${email}`, before, after: { email, full_name: name || null } });
+    return { ok: true, message: emailChanged ? `Saved. ${email} is now their login email.` : 'Saved' };
+  });
 }
