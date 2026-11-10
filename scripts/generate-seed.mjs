@@ -81,7 +81,7 @@ const settings = {
     instagram: 'https://www.instagram.com/hairvergreen/', tiktok: '', support_hours: 'Mon–Sat, 9am–6pm WAT',
   }],
   theme: [true, {
-    colors: { primary: '#0F3D2E', primary_contrast: '#F6F2EA', accent: '#B0925C', accent_strong: '#8C7142', background: '#F6F2EA', surface: '#FFFDF8', panel: '#EFE6D2', text: '#1B1A17', muted: '#6B665C', border: '#E3D9C4', sale: '#8A2E2E' },
+    colors: { primary: '#0F3D2E', primary_contrast: '#F6F2EA', accent: '#D7AB5B', accent_strong: '#826531', background: '#F6F2EA', surface: '#FFFDF8', panel: '#EFE6D2', text: '#1B1A17', muted: '#6B665C', border: '#E3D9C4', sale: '#8A2E2E' },
     fonts: { display: 'Cormorant Garamond', body: 'Jost' },
     radius: 'none', button_style: 'solid', product_card: 'editorial', animations: 'subtle',
     logo_media_url: null, favicon_url: null,

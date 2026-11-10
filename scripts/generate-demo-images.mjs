@@ -6,7 +6,7 @@ import { join } from 'node:path';
 const OUT = join(process.cwd(), 'public', 'demo');
 mkdirSync(OUT, { recursive: true });
 
-const C = { emerald: '#0F3D2E', deep: '#0A2A20', gold: '#B0925C', antique: '#B0925C', parchment: '#EFE6D2', ivory: '#F6F2EA', espresso: '#2B1D14', brown: '#5A3E2B' };
+const C = { emerald: '#0F3D2E', deep: '#0A2A20', gold: '#D7AB5B', antique: '#B0925C', parchment: '#EFE6D2', ivory: '#F6F2EA', espresso: '#2B1D14', brown: '#5A3E2B' };
 
 // Seeded PRNG so output is stable
 function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
