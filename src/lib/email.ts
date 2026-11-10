@@ -39,8 +39,8 @@ function layout(title: string, body: string, preheader = '') {
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#FFFDF8;border:1px solid #E3D9C4">
 <tr><td style="background:#0F3D2E;padding:28px;text-align:center">
 <div style="font-size:22px;letter-spacing:8px;color:#EFE6D2">HAIRVER GREEN</div>
-<div style="width:40px;height:1px;background:#D7AB5B;margin:12px auto"></div>
-<div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:4px;color:#D7AB5B">LUXURY HAIR HOUSE</div></td></tr>
+<div style="width:40px;height:1px;background:#B0925C;margin:12px auto"></div>
+<div style="font-family:Arial,sans-serif;font-size:10px;letter-spacing:4px;color:#B0925C">LUXURY HAIR HOUSE</div></td></tr>
 <tr><td style="padding:32px 28px;font-size:16px;line-height:1.6">${body}</td></tr>
 <tr><td style="padding:20px 28px;border-top:1px solid #E3D9C4;font-family:Arial,sans-serif;font-size:12px;color:#6B665C;text-align:center">
 Hairver Green · <a href="${env.siteUrl}" style="color:#0F3D2E">${env.siteUrl.replace(/^https?:\/\//, '')}</a></td></tr>
