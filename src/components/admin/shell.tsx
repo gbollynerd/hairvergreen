@@ -2,9 +2,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import { LayoutDashboard, BarChart3, ShoppingBag, RotateCcw, CreditCard, ShoppingCart, Package, Boxes, Layers, FolderTree, Star, Users, CalendarClock, Mail, Send, Percent, Megaphone, MessageSquare, Bell, Camera, FileText, BookOpen, Image as ImageIcon, Menu as MenuIcon, Truck, Receipt, UserCog, Shield, Settings, ScrollText, ExternalLink, X, PanelLeft, Wallet } from 'lucide-react';
+import { LayoutDashboard, BarChart3, ShoppingBag, RotateCcw, CreditCard, ShoppingCart, Package, Boxes, Layers, FolderTree, Star, Users, CalendarClock, Mail, Send, Percent, Megaphone, MessageSquare, Bell, Camera, FileText, BookOpen, Image as ImageIcon, Menu as MenuIcon, Truck, Receipt, UserCog, Shield, Settings, ScrollText, ExternalLink, X, PanelLeft, Wallet, Globe } from 'lucide-react';
 import { Mark } from '@/components/ui/logo';
 import { cn } from '@/lib/utils';
+import { SearchPalette, type Destination } from './search-palette';
 
 type Item = { href: string; label: string; icon: React.ComponentType<{ size?: number; strokeWidth?: number }>; perm: string | string[] };
 const NAV: { group: string; items: Item[] }[] = [
@@ -47,7 +48,8 @@ const NAV: { group: string; items: Item[] }[] = [
     { href: '/admin/navigation', label: 'Navigation', icon: MenuIcon, perm: 'navigation.manage' },
   ] },
   { group: 'Operations', items: [
-    { href: '/admin/shipping-zones', label: 'Shipping', icon: Truck, perm: 'shipping.manage' },
+    { href: '/admin/shipping-methods', label: 'Delivery methods', icon: Truck, perm: 'shipping.manage' },
+    { href: '/admin/shipping-zones', label: 'Shipping zones', icon: Globe, perm: 'shipping.manage' },
     { href: '/admin/taxes', label: 'Taxes', icon: Receipt, perm: 'taxes.manage' },
   ] },
   { group: 'Administration', items: [
@@ -58,10 +60,46 @@ const NAV: { group: string; items: Item[] }[] = [
   ] },
 ];
 
+// Extra search keywords and deep links (settings tabs, create screens) for the admin search.
+const KEYWORDS: Record<string, string> = {
+  '/admin/shipping-methods': 'delivery shipping rates courier dhl gig dispatch pickup express standard free shipping',
+  '/admin/shipping-zones': 'delivery countries states regions lagos abuja international',
+  '/admin/discounts': 'coupons promo codes sale offers',
+  '/admin/analytics': 'reports revenue profit sales statement',
+  '/admin/expenses': 'costs spending profit',
+  '/admin/pages': 'homepage hero sections page builder about faq policies',
+  '/admin/navigation': 'menu footer links header',
+  '/admin/users': 'team staff invite employees',
+  '/admin/roles': 'permissions access',
+  '/admin/media': 'images videos photos uploads library thumbnails',
+  '/admin/inventory': 'stock quantity low stock',
+  '/admin/returns': 'refunds rma exchanges',
+  '/admin/carts': 'abandoned recovery reminders',
+  '/admin/payments': 'paystack transactions',
+  '/admin/audit': 'history log changes activity',
+};
+const EXTRA: (Destination & { perm: string | string[] })[] = [
+  { label: 'Settings · Store details', href: '/admin/settings?tab=store', group: 'Settings', keywords: 'whatsapp phone email address instagram contact', perm: 'settings.edit' },
+  { label: 'Settings · Theme', href: '/admin/settings?tab=theme', group: 'Settings', keywords: 'colours colors fonts logo favicon brand', perm: 'theme.edit' },
+  { label: 'Settings · Checkout', href: '/admin/settings?tab=checkout', group: 'Settings', keywords: 'guest phone stock hold terms', perm: 'settings.edit' },
+  { label: 'Settings · Currencies', href: '/admin/settings?tab=currencies', group: 'Settings', keywords: 'usd gbp eur exchange rate dollar pound', perm: 'settings.edit' },
+  { label: 'Settings · Custom unit pricing', href: '/admin/settings?tab=custom_unit', group: 'Settings', keywords: 'configurator lace density surcharge', perm: 'settings.edit' },
+  { label: 'Settings · SEO', href: '/admin/settings?tab=seo', group: 'Settings', keywords: 'google search meta title description share image', perm: 'settings.edit' },
+  { label: 'Settings · Analytics & pixels', href: '/admin/settings?tab=analytics', group: 'Settings', keywords: 'google analytics ga4 meta facebook tiktok pixel', perm: 'settings.edit' },
+  { label: 'Settings · Notifications', href: '/admin/settings?tab=notifications', group: 'Settings', keywords: 'email alerts low stock new order', perm: 'settings.edit' },
+  { label: 'Settings · Integrations', href: '/admin/settings?tab=integrations', group: 'Settings', keywords: 'paystack resend keys email payments', perm: 'settings.edit' },
+  { label: 'New delivery method', href: '/admin/shipping-methods/new', group: 'Create', keywords: 'add shipping rate', perm: 'shipping.manage' },
+  { label: 'New discount code', href: '/admin/discounts/new', group: 'Create', keywords: 'add coupon promo', perm: 'coupons.create' },
+];
+
 export function AdminShell({ staff, children }: { staff: { email: string; name: string | null; roles: string[]; permissions: string[] }; children: React.ReactNode }) {
   const path = usePathname();
   const [open, setOpen] = useState(false);
   const can = (p: string | string[]) => (Array.isArray(p) ? p : [p]).some((x) => staff.permissions.includes(x));
+  const destinations: Destination[] = [
+    ...NAV.flatMap((g) => g.items.filter((i) => can(i.perm)).map((i) => ({ label: i.label, href: i.href, group: g.group, keywords: KEYWORDS[i.href.split('?')[0]] }))),
+    ...EXTRA.filter((e) => can(e.perm)).map(({ perm: _p, ...e }) => e),
+  ];
   const nav = (
     <nav aria-label="Admin" className="space-y-6 px-3 py-5">
       {NAV.map((g) => {
@@ -99,12 +137,12 @@ export function AdminShell({ staff, children }: { staff: { email: string; name: 
         </div>
       )}
       <div className="min-w-0">
-        <header className="sticky top-0 z-40 flex h-14 items-center justify-between border-b border-line bg-surface/95 px-4 backdrop-blur md:px-8">
-          <button type="button" className="lg:hidden" onClick={() => setOpen(true)} aria-label="Open admin menu"><PanelLeft size={20} /></button>
-          <div className="hidden text-[12px] text-muted lg:block">{staff.roles.map((r) => r.replace('_', ' ')).join(', ')}</div>
-          <div className="flex items-center gap-4 text-[13px]">
-            <Link href="/" target="_blank" className="inline-flex items-center gap-1.5 hover:underline">View store <ExternalLink size={13} /></Link>
-            <span className="hidden text-muted sm:inline">{staff.email}</span>
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-line bg-surface/95 px-4 backdrop-blur md:gap-6 md:px-8">
+          <button type="button" className="shrink-0 lg:hidden" onClick={() => setOpen(true)} aria-label="Open admin menu"><PanelLeft size={20} /></button>
+          <SearchPalette destinations={destinations} />
+          <div className="ml-auto flex shrink-0 items-center gap-4 text-[13px]">
+            <Link href="/" target="_blank" className="inline-flex items-center gap-1.5 hover:underline" aria-label="View store"><span className="max-sm:hidden">View store</span> <ExternalLink size={13} /></Link>
+            <span className="hidden text-muted xl:inline">{staff.email}</span>
             <form action="/auth/signout" method="post"><button className="underline">Sign out</button></form>
           </div>
         </header>

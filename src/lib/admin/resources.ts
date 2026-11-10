@@ -134,7 +134,8 @@ export const RESOURCES: Record<string, ResourceDef> = {
     ],
   },
   'shipping-zones': {
-    key: 'shipping-zones', table: 'shipping_zones', title: 'Shipping zones', singular: 'zone', titleField: 'name', permission: 'shipping.manage', refresh: 'content', orderBy: [['sort', true]],
+    key: 'shipping-zones', table: 'shipping_zones', title: 'Shipping zones', singular: 'zone',
+    description: 'Where you deliver to. Each zone has its own delivery methods and prices — edit those under Delivery methods.', titleField: 'name', permission: 'shipping.manage', refresh: 'content', orderBy: [['sort', true]],
     columns: [{ name: 'name', label: 'Zone' }, { name: 'countries', label: 'Countries', format: 'list' }, { name: 'states', label: 'Regions', format: 'list' }, { name: 'is_active', label: 'Active', format: 'boolean' }],
     fields: [
       { name: 'name', label: 'Name', type: 'text', required: true }, { name: 'sort', label: 'Order', type: 'number' },
@@ -144,7 +145,8 @@ export const RESOURCES: Record<string, ResourceDef> = {
     ],
   },
   'shipping-methods': {
-    key: 'shipping-methods', table: 'shipping_methods', title: 'Shipping methods', singular: 'method', titleField: 'name', permission: 'shipping.manage', refresh: 'content', orderBy: [['sort', true]],
+    key: 'shipping-methods', table: 'shipping_methods', title: 'Delivery methods', singular: 'delivery method',
+    description: 'The delivery options customers choose at checkout: name, courier, price, free-delivery threshold and delivery time, for each zone.', titleField: 'name', permission: 'shipping.manage', refresh: 'content', orderBy: [['sort', true]],
     select: '*, shipping_zones(name)',
     columns: [{ name: 'name', label: 'Method' }, { name: 'shipping_zones.name', label: 'Zone' }, { name: 'service_level', label: 'Level', format: 'badge' }, { name: 'base_rate', label: 'Rate', format: 'money' }, { name: 'free_over', label: 'Free over', format: 'money' }, { name: 'is_active', label: 'Active', format: 'boolean' }],
     filters: [{ name: 'zone_id', label: 'Zone', options: [] }],
