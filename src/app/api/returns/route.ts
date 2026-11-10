@@ -9,7 +9,7 @@ import { env } from '@/lib/env';
 const Body = z.object({
   order_number: z.string().max(30), token: z.string().max(64).optional(),
   items: z.array(z.object({ order_item_id: z.uuid(), quantity: z.number().int().min(1).max(50), reason: z.string().max(200).optional() })).min(1).max(30),
-  reason: z.string().trim().min(2).max(200), resolution: z.enum(['refund', 'exchange', 'store_credit']), note: z.string().max(1500).optional(),
+  reason: z.string().trim().min(2).max(200), resolution: z.enum(['exchange', 'repair']), note: z.string().max(1500).optional(),
   media: z.array(z.object({ path: z.string().max(300), bucket: z.string().max(40) })).max(6).optional(),
 });
 

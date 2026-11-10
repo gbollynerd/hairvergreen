@@ -212,7 +212,7 @@ export function ProductView({ product, attrs, compact = false, initialOptions }:
           <ul className="mt-8 grid gap-3 border-t border-line pt-6 text-[13px] text-muted">
             <li className="flex items-center gap-3"><ShieldCheck size={17} strokeWidth={1.3} className="text-accent-strong" /> Secure checkout with Paystack — card, transfer, USSD & more</li>
             <li className="flex items-center gap-3"><Truck size={17} strokeWidth={1.3} className="text-accent-strong" /> Ships worldwide · delivery options shown at checkout</li>
-            <li className="flex items-center gap-3"><RefreshCcw size={17} strokeWidth={1.3} className="text-accent-strong" /> <Link href="/policies/refund-policy" className="underline">Returns & exchanges policy</Link></li>
+            <li className="flex items-center gap-3"><RefreshCcw size={17} strokeWidth={1.3} className="text-accent-strong" /> <Link href="/policies/refund-policy" className="underline">Refund policy</Link> · wrong or faulty items replaced</li>
           </ul>
         )}
       </div>

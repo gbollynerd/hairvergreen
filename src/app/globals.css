@@ -126,6 +126,9 @@
   .prose-hg img { width: 100%; height: auto; }
   .prose-hg em { font-style: italic; }
   .prose-hg strong { font-weight: 600; }
+  .prose-hg table { display: block; width: 100%; overflow-x: auto; border-collapse: collapse; font-size: 14px; line-height: 1.55; }
+  .prose-hg th, .prose-hg td { border-bottom: 1px solid var(--hg-border); padding: 10px 14px 10px 0; text-align: left; vertical-align: top; }
+  .prose-hg th { font-family: var(--hg-font-body); font-size: 11px; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; color: var(--hg-muted); }
 
   .hairline { height: 1px; background: var(--hg-border); }
   .rule-gold { width: 44px; height: 1px; background: var(--hg-accent); }

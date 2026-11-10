@@ -62,7 +62,7 @@ export default async function ProductPage({ params, searchParams }: PageProps<'/
       <p>Lengths are measured straight from the weft to the tips. Wavy and curly textures sit shorter than their stretched length. <Link href="/hair-guide#length-guide" className="underline">See the full length guide</Link>.</p>) },
     d.care && { title: 'Care instructions', content: <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(d.care) }} /> },
     d.shipping_note && { title: 'Shipping', content: <p>{d.shipping_note} <Link href="/policies/shipping-policy" className="underline">Shipping policy</Link></p> },
-    d.returns_note && { title: 'Returns & exchanges', content: <p>{d.returns_note} <Link href="/policies/refund-policy" className="underline">Refund policy</Link></p> },
+    d.returns_note && { title: 'Refunds', content: <p>{d.returns_note} <Link href="/policies/refund-policy" className="underline">Refund policy</Link></p> },
   ].filter(Boolean) as { title: string; content: React.ReactNode }[];
 
   const prices = product.variants.map((v) => v.price);

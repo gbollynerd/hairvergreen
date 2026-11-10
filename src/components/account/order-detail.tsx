@@ -152,11 +152,11 @@ function ReturnForm({ order, items, token, onDone }: { order: Order; items: Orde
           order_number: order.order_number, token, items: chosen, reason: fd.get('reason'), resolution: fd.get('resolution'), note: fd.get('note') || undefined, media }) });
         const d = await r.json();
         if (!r.ok) toast(d.error || 'Could not submit your request', 'error');
-        else { toast(`Return ${d.rma_number} requested — we’ll be in touch.`); onDone(); }
+        else { toast(`Request ${d.rma_number} received — we’ll reply within 2 business days.`); onDone(); }
       } finally { setBusy(false); }
     }}>
-      <p className="font-display text-[24px]">Request a return or exchange</p>
-      <p className="text-[13px] text-muted">Please read our <Link href="/policies/refund-policy" className="underline">Refund Policy</Link>. Worn, cut, coloured or custom items can’t be returned.</p>
+      <p className="font-display text-[24px]">Report a wrong or faulty item</p>
+      <p className="text-[13px] text-muted">We don’t offer refunds, but we’ll replace or repair anything that arrived wrong or faulty — please tell us within 48 hours of delivery and add photos. See our <Link href="/policies/refund-policy" className="underline">Refund Policy</Link>.</p>
       <ul className="divide-y divide-line">{items.filter((i) => i.quantity > i.returned_quantity).map((i) => (
         <li key={i.id} className="flex items-center justify-between gap-4 py-3 text-[14px]">
           <span>{i.product_name} <span className="text-muted">{i.variant_title !== 'Default' && i.variant_title}</span></span>
@@ -168,8 +168,8 @@ function ReturnForm({ order, items, token, onDone }: { order: Order; items: Orde
       ))}</ul>
       <div className="grid gap-4 md:grid-cols-2">
         <label className="field"><span className="label">Reason</span><select name="reason" className="input" required>
-          {['Not as described', 'Wrong item received', 'Damaged or defective', 'Changed my mind', 'Wrong length or texture ordered', 'Other'].map((r) => <option key={r}>{r}</option>)}</select></label>
-        <label className="field"><span className="label">I’d like</span><select name="resolution" className="input"><option value="refund">A refund</option><option value="exchange">An exchange</option><option value="store_credit">Store credit</option></select></label>
+          {['Wrong item received', 'Damaged or defective', 'Not as described', 'Damaged in delivery', 'Other'].map((r) => <option key={r}>{r}</option>)}</select></label>
+        <label className="field"><span className="label">I’d like</span><select name="resolution" className="input"><option value="exchange">A replacement</option><option value="repair">A repair</option></select></label>
       </div>
       <label className="field"><span className="label">Details (optional)</span><textarea name="note" className="input !min-h-[80px]" maxLength={1500} /></label>
       <label className="field"><span className="label">Photos (optional)</span><input type="file" accept="image/*" multiple onChange={(e) => setFiles(Array.from(e.target.files ?? []))} className="text-[13px]" /></label>

@@ -171,7 +171,7 @@ values (${q(name)}, ${q(slug)}, ${parent ? `(select id from public.categories wh
 // ---------------------------------------------------------------------------
 const care = '<p>Detangle gently from ends to roots with a wide-tooth comb. Co-wash every 7–10 wears with a sulphate-free shampoo and a moisturising conditioner. Let it air-dry flat or on a stand, and use a heat protectant before styling. Store in a silk bag, away from direct sunlight.</p>';
 const shippingNote = 'In-stock items dispatch within 1–2 business days. Custom units dispatch after production. Delivery times and fees are calculated at checkout for your address.';
-const returnsNote = 'Unworn, unaltered hair with its lace and wefts intact can be returned or exchanged under our Returns Policy. For hygiene reasons, worn, cut, coloured or custom items cannot be returned.';
+const returnsNote = 'All sales are final — for hygiene reasons we don’t offer refunds or change-of-mind exchanges. If you receive the wrong item or a faulty one, tell us within 48 hours of delivery and we’ll replace or repair it.';
 const faq = (extra = []) => [
   ...extra,
   { q: 'Can I colour or bleach this hair?', a: 'Yes — virgin and donor hair can be coloured by a professional. We recommend a strand test first. Coloured hair is not eligible for return.' },
