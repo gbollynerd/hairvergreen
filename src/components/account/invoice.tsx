@@ -2,6 +2,7 @@ import { formatMoney } from '@/lib/money';
 import { formatDate, countryName } from '@/lib/utils';
 import type { Order, OrderItem } from '@/lib/types';
 import { PrintButton } from './print-button';
+import { Mark } from '@/components/ui/logo';
 
 export function Invoice({ order, items, store, packing }: { order: Order; items: OrderItem[]; store: Record<string, string>; packing?: boolean }) {
   const a = order.shipping_address; const b = order.billing_address ?? a;
@@ -9,7 +10,8 @@ export function Invoice({ order, items, store, packing }: { order: Order; items:
     <div className="mx-auto max-w-3xl bg-white p-8 text-[13px] text-ink print:p-0">
       <div className="mb-6 flex justify-end print:hidden"><PrintButton /></div>
       <header className="flex items-start justify-between border-b border-line pb-6">
-        <div><p className="wordmark text-[20px]">Hairver Green</p><p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-muted">Luxury Hair House</p>
+        <div><div className="flex items-center gap-3"><Mark title="" className="h-11 w-auto shrink-0 text-accent [print-color-adjust:exact] [-webkit-print-color-adjust:exact]" />
+            <div><p className="wordmark text-[20px]">Hairver Green</p><p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-muted">Luxury Hair House</p></div></div>
           <p className="mt-3 text-muted">{store.address}<br />{store.email}{store.phone && <><br />{store.phone}</>}</p></div>
         <div className="text-right"><p className="font-display text-[28px]">{packing ? 'Packing slip' : 'Invoice'}</p><p className="mt-1">Order {order.order_number}</p><p className="text-muted">{formatDate(order.paid_at ?? order.placed_at)}</p>
           {!packing && <p className="mt-1 text-muted">Payment: {order.payment_status}{order.payment_channel ? ` · ${order.payment_channel}` : ''}</p>}</div>
