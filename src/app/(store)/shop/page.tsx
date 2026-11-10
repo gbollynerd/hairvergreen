@@ -8,7 +8,7 @@ export async function generateMetadata({ searchParams }: PageProps<'/shop'>) {
   const t = typeof sp.texture === 'string' ? attrs.find((a) => a.attribute === 'texture' && a.slug === sp.texture)?.label : null;
   const l = typeof sp.length === 'string' ? attrs.find((a) => a.attribute === 'length' && a.slug === sp.length)?.label : null;
   const title = t ? `${t} Hair & Wigs` : l ? `${l} Hair & Wigs` : 'Shop All Hair & Wigs';
-  return meta({ title, description: 'Luxury virgin hair, donor hair, ready-to-wear wigs and custom units from Hairver Green, Lagos.', path: '/shop' });
+  return meta({ title, description: 'Luxury virgin hair, donor hair, ready-to-wear wigs and custom units from Hairver Green.', path: '/shop' });
 }
 
 export default async function Shop({ searchParams }: PageProps<'/shop'>) {

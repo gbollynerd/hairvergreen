@@ -39,7 +39,11 @@ export function CheckoutClient({ initialCart, user, addresses, profile, requireP
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState('');
   const [summaryOpen, setSummaryOpen] = useState(false);
-  const [step, setStep] = useState<1 | 2 | 3>(user ? 2 : 1);
+  // Signed-in shoppers skip Contact only when we already have everything it asks for (incl. a phone, if required)
+  const [step, setStep] = useState<1 | 2 | 3>(() => {
+    const knownPhone = (profile?.phone ?? def?.phone ?? '').trim().length >= 7;
+    return user && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(user.email ?? '') && (!requirePhone || knownPhone) ? 2 : 1;
+  });
 
   useEffect(() => { track('begin_checkout', { value: initialCart.total }); }, [initialCart.total]);
 
@@ -66,7 +70,10 @@ export function CheckoutClient({ initialCart, user, addresses, profile, requireP
     else setShip(blank(ship.country));
   };
 
-  const contactValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && (!requirePhone || phone.trim().length >= 7);
+  const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+  // A delivery phone also satisfies the phone requirement (the server accepts either)
+  const phoneValid = !requirePhone || phone.trim().length >= 7 || (ship.phone ?? '').trim().length >= 7;
+  const contactValid = emailValid && phoneValid;
   const addrValid = ship.first_name && ship.last_name && ship.line1.length >= 3 && ship.city && ship.country && (ship.country !== 'NG' || ship.state);
   const billValid = billingSame || (bill.first_name && bill.last_name && bill.line1 && bill.city && bill.country);
 
@@ -213,6 +220,20 @@ export function CheckoutClient({ initialCart, user, addresses, profile, requireP
                 {!billingSame && <AddressFields a={bill} onChange={(p) => setBill((b) => ({ ...b, ...p }))} compact />}
                 {allowNote && <label className="field"><span className="label">Order note (optional)</span><textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={1000} className="input !min-h-[80px]" placeholder="Anything we should know?" /></label>}
                 {error && <p className="bg-sale/10 p-3 text-[14px] text-sale" role="alert">{error}</p>}
+                {!paying && (() => {
+                  const missing: { text: string; fix: () => void }[] = [];
+                  if (!emailValid) missing.push({ text: 'Add your email address', fix: () => setStep(1) });
+                  if (!phoneValid) missing.push({ text: 'Add a phone number so the courier can reach you', fix: () => setStep(1) });
+                  if (!addrValid) missing.push({ text: 'Complete your delivery address', fix: () => setStep(2) });
+                  if (!billValid) missing.push({ text: 'Complete your billing address', fix: () => {} });
+                  if (q.has_errors) missing.push({ text: 'Some items in your bag need attention', fix: () => setSummaryOpen(true) });
+                  return missing.length ? (
+                    <div className="border border-sale/30 bg-sale/5 p-4 text-[14px]" role="alert">
+                      <p className="font-medium text-sale">Before you can pay:</p>
+                      <ul className="mt-2 space-y-1">{missing.map((m) => <li key={m.text}><button type="button" onClick={m.fix} className="text-left underline">{m.text}</button></li>)}</ul>
+                    </div>
+                  ) : null;
+                })()}
                 <button type="button" onClick={pay} disabled={paying || !billValid || q.has_errors || !contactValid || !addrValid} className="btn btn-primary btn-block !min-h-[56px]">
                   <Lock size={15} /> {paying ? 'Redirecting to Paystack…' : `Pay ${money(q.total)}`}
                 </button>

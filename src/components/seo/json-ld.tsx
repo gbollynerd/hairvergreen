@@ -12,7 +12,7 @@ export function OrganizationJsonLd({ store }: { store: StoreSettings }) {
       '@context': 'https://schema.org',
       '@graph': [
         { '@type': 'Organization', '@id': `${env.siteUrl}/#org`, name: 'Hairver Green', url: env.siteUrl, logo: `${env.siteUrl}/icon.svg`, sameAs,
-          address: { '@type': 'PostalAddress', addressLocality: store.city || 'Lagos', addressCountry: store.country || 'NG' },
+          address: { '@type': 'PostalAddress', ...(store.city ? { addressLocality: store.city } : {}), addressCountry: store.country || 'NG' },
           ...(store.email ? { email: store.email } : {}), ...(store.phone ? { telephone: store.phone } : {}) },
         { '@type': 'WebSite', '@id': `${env.siteUrl}/#website`, url: env.siteUrl, name: 'Hairver Green', publisher: { '@id': `${env.siteUrl}/#org` },
           potentialAction: { '@type': 'SearchAction', target: `${env.siteUrl}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' } },

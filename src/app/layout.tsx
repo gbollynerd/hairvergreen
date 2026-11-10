@@ -37,8 +37,8 @@ const bodoni = localFont({
 
 export async function generateMetadata(): Promise<Metadata> {
   const s = isConfigured() ? await getSettings() : null;
-  const title = s?.seo.default_title || 'Hairver Green — Luxury Hair House, Lagos';
-  const description = s?.seo.default_description || 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted in Lagos and delivered worldwide.';
+  const title = s?.seo.default_title || 'Hairver Green — Luxury Hair House';
+  const description = s?.seo.default_description || 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, hand-finished and delivered worldwide.';
   return {
     metadataBase: new URL(env.siteUrl),
     title: { default: title, template: s?.seo.title_template || '%s · Hairver Green' },

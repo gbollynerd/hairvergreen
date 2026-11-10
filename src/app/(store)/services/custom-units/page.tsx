@@ -7,7 +7,7 @@ import { Reveal } from '@/components/ui/reveal';
 import { meta } from '@/lib/seo';
 
 export const revalidate = 300;
-export const generateMetadata = () => meta({ title: 'Custom Units — Made Around You', description: 'Design a custom wig unit with Hairver Green in Lagos: choose hair, texture, length, lace, density, colour and finish. Confirmed with you before production.', path: '/services/custom-units' });
+export const generateMetadata = () => meta({ title: 'Custom Units — Made Around You', description: 'Design a custom wig unit with Hairver Green: choose hair, texture, length, lace, density, colour and finish. Confirmed with you before production.', path: '/services/custom-units' });
 
 export default async function CustomUnits() {
   const [product, { data: cfgRow }] = await Promise.all([

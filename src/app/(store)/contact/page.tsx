@@ -4,7 +4,7 @@ import { InstagramIcon, WhatsAppIcon } from '@/components/ui/icons';
 import { meta } from '@/lib/seo';
 
 export const revalidate = 300;
-export const generateMetadata = () => meta({ title: 'Contact', description: 'Get in touch with Hairver Green in Lagos — orders, custom units and hair advice.', path: '/contact' });
+export const generateMetadata = () => meta({ title: 'Contact', description: 'Get in touch with Hairver Green — orders, custom units and hair advice.', path: '/contact' });
 
 export default async function Contact() {
   const { store } = await getSettings();

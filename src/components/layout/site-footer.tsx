@@ -13,7 +13,7 @@ export function SiteFooter({ menus, store }: { menus: Record<string, MenuItem[]>
         <div className="lg:col-span-4">
           <Mark className="h-14 w-auto text-accent" />
           <p className="wordmark mt-5 text-[18px]">Hairver Green</p>
-          <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-accent">Luxury Hair House · Lagos</p>
+          <p className="mt-2 text-[11px] uppercase tracking-[0.3em] text-accent">Luxury Hair House</p>
           <p className="mt-8 font-display text-[26px] leading-tight">Be the first to know.</p>
           <p className="mt-2 text-[14px] text-primary-contrast/70">New drops, exclusive offers and hair care notes.</p>
           <div className="mt-5 max-w-md"><NewsletterForm dark source="footer" /></div>

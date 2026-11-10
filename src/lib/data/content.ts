@@ -9,7 +9,7 @@ const REVALIDATE = 300;
 
 export const DEFAULT_THEME: ThemeSettings = {
   colors: {
-    primary: '#0F3D2E', primary_contrast: '#F6F2EA', accent: '#D8C08E', accent_strong: '#B0925C', background: '#F6F2EA',
+    primary: '#0F3D2E', primary_contrast: '#F6F2EA', accent: '#B0925C', accent_strong: '#8C7142', background: '#F6F2EA',
     surface: '#FFFDF8', panel: '#EFE6D2', text: '#1B1A17', muted: '#6B665C', border: '#E3D9C4', sale: '#8A2E2E',
   },
   fonts: { display: 'Cormorant Garamond', body: 'Jost' }, radius: 'none', button_style: 'solid', product_card: 'editorial',
@@ -17,7 +17,7 @@ export const DEFAULT_THEME: ThemeSettings = {
 };
 
 export const DEFAULT_STORE: StoreSettings = {
-  name: 'Hairver Green', short_name: 'HairverGreen', tagline: 'Luxury Hair House · Lagos', email: 'hello@hairvergreen.com', phone: '',
+  name: 'Hairver Green', short_name: 'HairverGreen', tagline: 'Luxury Hair House', email: 'hello@hairvergreen.com', phone: '',
   whatsapp: '', address: 'Lagos, Nigeria', city: 'Lagos', country: 'NG', instagram: 'https://www.instagram.com/hairvergreen/', tiktok: '',
   support_hours: '',
 };

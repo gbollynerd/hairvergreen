@@ -28,7 +28,7 @@ export function Wordmark({ className, tagline = false, logoUrl }: { className?: 
       {tagline && (
         <>
           <span className="rule-gold my-2" aria-hidden />
-          <span className="text-[9px] tracking-[0.3em] uppercase text-accent-strong">Luxury Hair House · Lagos</span>
+          <span className="text-[9px] tracking-[0.3em] uppercase text-accent-strong">Luxury Hair House</span>
         </>
       )}
     </span>

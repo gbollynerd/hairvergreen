@@ -6,7 +6,7 @@ import { formatDate, cn } from '@/lib/utils';
 import { meta } from '@/lib/seo';
 
 export const revalidate = 300;
-export const generateMetadata = () => meta({ title: 'The Hair Journal', description: 'Hair care, wig care, styling and hair education from the Hairver Green studio in Lagos.', path: '/journal' });
+export const generateMetadata = () => meta({ title: 'The Hair Journal', description: 'Hair care, wig care, styling and hair education from the Hairver Green studio.', path: '/journal' });
 
 export default async function Journal({ searchParams }: PageProps<'/journal'>) {
   const sp = await searchParams;

@@ -76,12 +76,12 @@ insert into public.role_permissions (role_id, permission_key) select r.id, k fro
 // ---------------------------------------------------------------------------
 const settings = {
   store: [true, {
-    name: 'Hairver Green', short_name: 'HairverGreen', tagline: 'Luxury Hair House · Lagos',
+    name: 'Hairver Green', short_name: 'HairverGreen', tagline: 'Luxury Hair House',
     email: 'hello@hairvergreen.com', phone: '', whatsapp: '', address: 'Lagos, Nigeria', city: 'Lagos', country: 'NG',
     instagram: 'https://www.instagram.com/hairvergreen/', tiktok: '', support_hours: 'Mon–Sat, 9am–6pm WAT',
   }],
   theme: [true, {
-    colors: { primary: '#0F3D2E', primary_contrast: '#F6F2EA', accent: '#D8C08E', accent_strong: '#B0925C', background: '#F6F2EA', surface: '#FFFDF8', panel: '#EFE6D2', text: '#1B1A17', muted: '#6B665C', border: '#E3D9C4', sale: '#8A2E2E' },
+    colors: { primary: '#0F3D2E', primary_contrast: '#F6F2EA', accent: '#B0925C', accent_strong: '#8C7142', background: '#F6F2EA', surface: '#FFFDF8', panel: '#EFE6D2', text: '#1B1A17', muted: '#6B665C', border: '#E3D9C4', sale: '#8A2E2E' },
     fonts: { display: 'Cormorant Garamond', body: 'Jost' },
     radius: 'none', button_style: 'solid', product_card: 'editorial', animations: 'subtle',
     logo_media_url: null, favicon_url: null,
@@ -90,8 +90,8 @@ const settings = {
   currencies: [true, { base: 'NGN', display: [
     { code: 'NGN', symbol: '₦', rate: 1 }, { code: 'USD', symbol: '$', rate: 1550 }, { code: 'GBP', symbol: '£', rate: 2050 }, { code: 'EUR', symbol: '€', rate: 1750 },
   ], note: 'rate = Naira per 1 unit of the currency. Display only — customers are always charged in NGN.' }],
-  seo: [true, { title_template: '%s · Hairver Green', default_title: 'Hairver Green — Luxury Hair House, Lagos',
-    default_description: 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted in Lagos and delivered worldwide.', og_image: null }],
+  seo: [true, { title_template: '%s · Hairver Green', default_title: 'Hairver Green — Luxury Hair House',
+    default_description: 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, hand-finished and delivered worldwide.', og_image: null }],
   analytics: [true, { ga4_id: '', meta_pixel_id: '', tiktok_pixel_id: '', gsc_verification: '' }],
   shipping: [true, { free_shipping_banner: true, origin_country: 'NG', origin_state: 'Lagos' }],
   notifications: [false, { order_alert_emails: [], low_stock_emails: [], from_name: 'Hairver Green' }],
@@ -148,7 +148,7 @@ sql(`insert into public.attribute_values (attribute, label, slug, sort, swatch, 
 // Categories
 // ---------------------------------------------------------------------------
 const cats = [
-  ['Wigs', 'wigs', null, 'Ready-to-wear, glueless and lace units, finished by hand in Lagos.', 'editorial-3.svg'],
+  ['Wigs', 'wigs', null, 'Ready-to-wear, glueless and lace units, finished by hand.', 'editorial-3.svg'],
   ['Hair', 'hair', null, 'Virgin and donor hair in every texture, sold by the bundle, closure and frontal.', 'editorial-1.svg'],
   ['Care & Accessories', 'accessories', null, 'Everything you need to keep your hair beautiful for longer.', 'care-kit.svg'],
   ['Ready-to-Wear Wigs', 'ready-to-wear', 'wigs', 'Styled, plucked and ready the day it arrives.', 'body-wave-2.svg'],
@@ -170,7 +170,7 @@ values (${q(name)}, ${q(slug)}, ${parent ? `(select id from public.categories wh
 // Products
 // ---------------------------------------------------------------------------
 const care = '<p>Detangle gently from ends to roots with a wide-tooth comb. Co-wash every 7–10 wears with a sulphate-free shampoo and a moisturising conditioner. Let it air-dry flat or on a stand, and use a heat protectant before styling. Store in a silk bag, away from direct sunlight.</p>';
-const shippingNote = 'In-stock items dispatch from Lagos within 1–2 business days. Custom units dispatch after production. Delivery times and fees are calculated at checkout for your address.';
+const shippingNote = 'In-stock items dispatch within 1–2 business days. Custom units dispatch after production. Delivery times and fees are calculated at checkout for your address.';
 const returnsNote = 'Unworn, unaltered hair with its lace and wefts intact can be returned or exchanged under our Returns Policy. For hygiene reasons, worn, cut, coloured or custom items cannot be returned.';
 const faq = (extra = []) => [
   ...extra,
@@ -454,7 +454,7 @@ for (const s of ['ready-to-wear-unit', 'signature-glueless-unit', 'full-lace-lux
 // Collections
 const cols = [
   ['Best Sellers', 'best-sellers', 'The pieces our clients return to.', 'body-wave-2.svg', true],
-  ['New Arrivals', 'new-arrivals', 'Just landed in the Lagos studio.', 'deep-wave-2.svg', true],
+  ['New Arrivals', 'new-arrivals', 'Just landed in the studio.', 'deep-wave-2.svg', true],
   ['The Signature Collection', 'signature', 'The textures and units that define Hairver Green.', 'editorial-1.svg', true],
   ['The Luxury Collection', 'luxury', 'Donor hair and full lace — our most refined pieces.', 'editorial-3.svg', false],
   ['Sale', 'sale', 'Selected pieces, for a limited time.', 'loose-wave-2.svg', false],
@@ -547,30 +547,30 @@ sql(`insert into public.menus (key, name, items) values\n${Object.entries(menus)
 // Pages & homepage sections
 // ---------------------------------------------------------------------------
 const page = (slug, title, kind, body, seo) => sql(`insert into public.pages (slug, title, kind, status, body, seo_description, published_at) values (${q(slug)}, ${q(title)}, ${q(kind)}, 'published', ${q(body)}, ${q(seo)}, now());`);
-page('home', 'Home', 'home', null, 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted in Lagos and delivered worldwide.');
+page('home', 'Home', 'home', null, 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, hand-finished and delivered worldwide.');
 const sections = [
-  ['hero', 'Hero', { layout: 'split', font: 'editorial', eyebrow: 'Luxury Hair House · Lagos', heading: 'Luxury hair. *Beautifully* yours.', text: 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted for effortless beauty.',
+  ['hero', 'Hero', { layout: 'split', font: 'editorial', eyebrow: 'Luxury Hair House', heading: 'Luxury hair. *Beautifully* yours.', text: 'Premium virgin hair, donor hair, custom units and ready-to-wear wigs, crafted for effortless beauty.',
     media: { kind: 'image', url: '/hero/hero-curly.jpg', alt: 'Model wearing voluminous curly hair' }, focal: '50% 20%',
     ctas: [{ label: 'Shop wigs', href: '/wigs', style: 'primary' }, { label: 'Shop hair', href: '/hair', style: 'secondary' }],
-    trust: [{ text: 'Hand-finished in Lagos' }, { text: 'Virgin & single-donor hair' }, { text: 'Tracked worldwide shipping' }],
+    trust: [{ text: 'Hand-finished in our studio' }, { text: 'Virgin & single-donor hair' }, { text: 'Tracked worldwide shipping' }],
     feature_product: 'burmese-curly', feature_eyebrow: 'Worn here · New', theme: 'dark' }],
   ['category_grid', 'Featured categories', { heading: 'Find your hair', eyebrow: 'Shop', items: [
     { label: 'Ready-to-Wear', href: '/wigs/ready-to-wear', image: '/demo/body-wave-2.svg' }, { label: 'Custom Units', href: '/services/custom-units', image: '/demo/custom-unit.svg' },
     { label: 'Virgin Hair', href: '/hair/virgin-hair', image: '/demo/body-wave-1.svg' }, { label: 'Donor Hair', href: '/hair/donor-hair', image: '/demo/straight-3.svg' }], layout: 'grid-4' }],
   ['product_carousel', 'Best sellers', { heading: 'Best sellers', eyebrow: 'Most loved', source: 'collection', collection: 'best-sellers', limit: 8, cta: { label: 'Shop best sellers', href: '/collections/best-sellers' } }],
-  ['editorial', 'From Lagos, for the world', { eyebrow: 'Hairver Green', heading: 'From Lagos, for the world.', text: 'Discover premium hair crafted with intention and delivered wherever you are.',
+  ['editorial', 'Crafted for the world', { eyebrow: 'Hairver Green', heading: 'Crafted for the world.', text: 'Discover premium hair crafted with intention and delivered wherever you are.',
     media: { kind: 'image', url: '/demo/editorial-1.svg', alt: '' }, cta: { label: 'Explore Hairver Green', href: '/about' }, layout: 'image-left', background: 'panel' }],
   ['product_carousel', 'New arrivals', { heading: 'New arrivals', eyebrow: 'Just landed', source: 'collection', collection: 'new-arrivals', limit: 8, cta: { label: 'Shop new arrivals', href: '/collections/new-arrivals' } }],
   ['shop_the_look', 'Shop the look', { heading: 'Shop the look', eyebrow: 'Editorial', media: { kind: 'image', url: '/demo/editorial-2.svg', alt: '' }, products: ['signature-glueless-unit', 'wig-care-kit', 'silk-storage-bag'], text: 'Our Signature Glueless Unit, finished and styled — with everything you need to keep it that way.' }],
-  ['collection_feature', 'Signature collection', { eyebrow: 'The Signature Collection', heading: 'Made to be noticed.', text: 'The textures and units that define Hairver Green — selected, finished and checked by hand in our Lagos studio.',
+  ['collection_feature', 'Signature collection', { eyebrow: 'The Signature Collection', heading: 'Made to be noticed.', text: 'The textures and units that define Hairver Green — selected, finished and checked by hand in our studio.',
     collection: 'signature', media: { kind: 'image', url: '/demo/editorial-3.svg', alt: '' }, cta: { label: 'Discover the collection', href: '/collections/signature' }, theme: 'dark' }],
   ['value_props', 'Why Hairver Green', { heading: 'Why Hairver Green', items: [
     { title: 'Premium hair', text: 'Virgin and single-donor hair, selected strand by strand.', icon: 'sparkle' },
-    { title: 'Expert craftsmanship', text: 'Every unit is constructed, plucked and finished by hand in Lagos.', icon: 'scissors' },
+    { title: 'Expert craftsmanship', text: 'Every unit is constructed, plucked and finished by hand.', icon: 'scissors' },
     { title: 'Global shipping', text: 'Tracked delivery across Nigeria and worldwide.', icon: 'globe' },
     { title: 'Personal service', text: 'Real people, on hand to help you choose.', icon: 'heart' }] }],
   ['process_steps', 'Custom unit experience', { eyebrow: 'Custom units', heading: 'Crafted around you.', text: 'A unit built to your measurements, texture and style — confirmed with you at every step.',
-    steps: [{ title: 'Consultation', text: 'Tell us the look and feel you want.' }, { title: 'Selection', text: 'Choose your hair, lace and density.' }, { title: 'Customisation', text: 'Colour, parting, plucking and finish.' }, { title: 'Crafting', text: 'Built by hand in our Lagos studio.' }, { title: 'Delivery', text: 'Styled, checked and sent to you.' }],
+    steps: [{ title: 'Consultation', text: 'Tell us the look and feel you want.' }, { title: 'Selection', text: 'Choose your hair, lace and density.' }, { title: 'Customisation', text: 'Colour, parting, plucking and finish.' }, { title: 'Crafting', text: 'Built by hand in our studio.' }, { title: 'Delivery', text: 'Styled, checked and sent to you.' }],
     media: { kind: 'image', url: '/demo/custom-unit.svg', alt: '' }, cta: { label: 'Create your custom unit', href: '/services/custom-units' } }],
   ['reviews', 'Customer reviews', { heading: 'In their words', eyebrow: 'Reviews', limit: 8 }],
   ['social_gallery', 'Social gallery', { heading: 'Follow the Hairver Green world', eyebrow: '@hairvergreen', cta: { label: 'Follow on Instagram', href: 'https://www.instagram.com/hairvergreen/' } }],
@@ -579,10 +579,10 @@ const sections = [
 ];
 sections.forEach(([type, name, settings], i) => sql(`insert into public.page_sections (page_id, type, name, sort, settings) values ((select id from public.pages where slug = 'home'), ${q(type)}, ${q(name)}, ${i}, ${j(settings)});`));
 
-page('about', 'About', 'page', null, 'Hairver Green is a luxury hair house in Lagos, Nigeria.');
+page('about', 'About', 'page', null, 'Hairver Green is a luxury hair house.');
 [
-  ['hero', 'About hero', { eyebrow: 'Our story', heading: 'A luxury hair house, born in Lagos.', text: 'We make hair for women who know exactly how they want to feel.', media: { kind: 'image', url: '/demo/editorial-3.svg', alt: '' }, height: 'medium', align: 'center', overlay: 0.3, theme: 'dark' }],
-  ['rich_text', 'Story', { html: '<p><em>Replace this with the Hairver Green story.</em> Use this space to share how the brand began, who is behind it and what you believe beautiful hair should feel like.</p><p>Talk about how you select your hair, how units are made in your Lagos studio, and the care you put into every order that leaves it.</p>', width: 'narrow' }],
+  ['hero', 'About hero', { eyebrow: 'Our story', heading: 'A luxury hair house, made with intention.', text: 'We make hair for women who know exactly how they want to feel.', media: { kind: 'image', url: '/demo/editorial-3.svg', alt: '' }, height: 'medium', align: 'center', overlay: 0.3, theme: 'dark' }],
+  ['rich_text', 'Story', { html: '<p><em>Replace this with the Hairver Green story.</em> Use this space to share how the brand began, who is behind it and what you believe beautiful hair should feel like.</p><p>Talk about how you select your hair, how units are made in your studio, and the care you put into every order that leaves it.</p>', width: 'narrow' }],
   ['value_props', 'Values', { heading: 'What we stand for', items: [{ title: 'Authenticity', text: 'Honest descriptions of every texture, grade and origin.' }, { title: 'Craft', text: 'Hand-finished units, checked before they leave the studio.' }, { title: 'Care', text: 'Guidance before and after you buy.' }] }],
   ['newsletter', 'Newsletter', { heading: 'Stay close.', text: 'New drops, offers and hair care notes — straight to your inbox.', theme: 'dark' }],
 ].forEach(([type, name, settings], i) => sql(`insert into public.page_sections (page_id, type, name, sort, settings) values ((select id from public.pages where slug = 'about'), ${q(type)}, ${q(name)}, ${i}, ${j(settings)});`));
@@ -626,7 +626,7 @@ const posts = [
     '<p>Body wave is our signature texture for a reason — it is soft, versatile and forgiving. A few habits keep it that way.</p><h2>Wash less, condition more</h2><p>Co-wash every 7–10 wears with a sulphate-free shampoo, and always follow with a moisturising conditioner.</p><h2>Detangle from the ends</h2><p>Use a wide-tooth comb and work upwards from the ends to the roots, holding the hair above the section you are combing.</p><h2>Let the pattern come back</h2><p>After washing, rake a light leave-in through with your fingers and let it air-dry. The wave returns on its own.</p>', ['signature-body-wave', 'wig-care-kit']],
   ['closure-vs-frontal', 'Closure or frontal: which is right for you?', 'hair-education', 'journal-3.svg', 'Both give you a natural parting — the difference is how much freedom you want.',
     '<p>Closures and frontals both finish an install with a natural-looking parting. The choice comes down to how you like to style.</p><h2>Closures</h2><p>A 4×4, 5×5 or 6×6 square of lace that covers the parting area. Lower maintenance and easy to install.</p><h2>Frontals</h2><p>A 13×4 or 13×6 lace that runs ear to ear. It gives a full hairline, so you can part anywhere and wear the hair off your face.</p>', ['hd-lace-closure', 'hd-lace-frontal']],
-  ['welcome-to-hairver-green', 'Welcome to Hairver Green', 'hairver-green-stories', 'journal-4.svg', 'A luxury hair house, from Lagos to wherever life takes you.',
+  ['welcome-to-hairver-green', 'Welcome to Hairver Green', 'hairver-green-stories', 'journal-4.svg', 'A luxury hair house, for wherever life takes you.',
     '<p><em>Replace this post with your own story.</em> This is where you can introduce the Hairver Green studio, the people behind it and the craft that goes into every piece.</p>', []],
 ];
 posts.forEach(([slug, title, cat, img, excerpt, body, prods], i) => sql(`insert into public.blog_posts (slug, title, excerpt, body, category_id, featured_image_id, author_name, status, published_at, related_product_ids, reading_minutes, seo_description, tags)
@@ -639,7 +639,7 @@ values (${q(slug)}, ${q(title)}, ${q(excerpt)}, ${q(body)}, (select id from publ
 sql(`insert into public.popups (name, kind, title, body, image_id, cta_label, coupon_code, collect_email, trigger, delay_seconds, frequency_days, audience, is_active, style)
 values ('Welcome offer', 'welcome', 'Get 10% off your first order', 'Join the Hairver Green list for new drops, exclusive offers and hair care notes. Your code arrives instantly.', ${M('editorial-1.svg')}, 'Unlock 10% off', 'WELCOME10', true, 'delay', 12, 14, 'new_visitors', true, '{"layout":"split","background":"ivory","animation":"fade"}'::jsonb);`);
 sql(`insert into public.announcements (message, href, sort) values
-('Global shipping available — from Lagos to wherever you are', '/policies/shipping-policy', 0),
+('Global shipping available — wherever you are', '/policies/shipping-policy', 0),
 ('Free Lagos delivery on orders over ₦400,000', '/policies/shipping-policy', 1),
 ('New drop — Burmese Curly is here', '/products/burmese-curly', 2);`);
 for (let i = 1; i <= 8; i++) {
