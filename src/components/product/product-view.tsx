@@ -8,6 +8,8 @@ import type { ProductFull, Variant, BundleItem } from '@/lib/types';
 import { useStore } from '@/components/store/store-provider';
 import { Price } from '@/components/store/price';
 import { WishlistButton } from '@/components/store/wishlist-button';
+import { ShareButton } from '@/components/store/share-button';
+import { shareImage } from '@/lib/share-image';
 import { Stars } from '@/components/ui/stars';
 import { ProductGallery } from './product-gallery';
 import { track } from '@/lib/analytics-client';
@@ -199,7 +201,10 @@ export function ProductView({ product, attrs, compact = false, initialOptions }:
         )}
 
         <div className="mt-5 flex items-center justify-between">
-          <WishlistButton productId={product.id} name={product.name} withLabel />
+          <div className="flex items-center gap-6">
+            <WishlistButton productId={product.id} name={product.name} withLabel />
+            <ShareButton title={product.name} text={product.short_description ?? undefined} path={`/products/${product.slug}`} image={shareImage(product.media)} />
+          </div>
           {compact && <Link href={`/products/${product.slug}`} onClick={() => setQuickView(null)} className="caps text-[11px] underline">View full details</Link>}
         </div>
 

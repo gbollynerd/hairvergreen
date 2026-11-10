@@ -1,3 +1,4 @@
+import { shareImage } from '@/lib/share-image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getProduct, getAttrMap, getRelated, getProductReviews, getAttributes, productsByIds, toCard } from '@/lib/data/catalog';
@@ -18,7 +19,7 @@ export async function generateMetadata({ params }: PageProps<'/products/[slug]'>
   const { slug } = await params;
   const p = await getProduct(slug);
   if (!p) return {};
-  return meta({ title: p.seo_title || p.name, description: p.seo_description || p.short_description, path: `/products/${slug}`, image: p.media[0]?.media.url, noindex: p.noindex });
+  return meta({ title: p.seo_title || p.name, description: p.seo_description || p.short_description, path: `/products/${slug}`, image: shareImage(p.media), noindex: p.noindex });
 }
 
 export default async function ProductPage({ params, searchParams }: PageProps<'/products/[slug]'>) {
