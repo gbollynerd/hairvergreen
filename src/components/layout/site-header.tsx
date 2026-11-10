@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { Search, User, Heart, ShoppingBag, Menu, ChevronDown } from 'lucide-react';
 import { useStore } from '@/components/store/store-provider';
-import { Wordmark } from '@/components/ui/logo';
+import { Mark, Wordmark } from '@/components/ui/logo';
 import { Media } from '@/components/ui/media';
 import type { MenuItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -41,7 +41,10 @@ export function SiteHeader({ nav, logoUrl }: { nav: NavItem[]; logoUrl?: string 
             <Search size={20} strokeWidth={1.3} /><span className="hidden caps text-muted lg:inline">Search</span>
           </button>
         </div>
-        <Link href="/" aria-label="Hairver Green — home" className="text-primary"><Wordmark logoUrl={logoUrl} /></Link>
+        <Link href="/" aria-label="Hairver Green — home" className="flex min-w-0 items-center gap-2.5 text-primary md:gap-3">
+          {!logoUrl && <Mark title="" className="h-7 w-auto shrink-0 text-accent max-[340px]:hidden md:h-9" />}
+          <Wordmark logoUrl={logoUrl} />
+        </Link>
         <div className="flex items-center justify-end gap-0.5">
           <Link href={user ? '/account' : '/login'} className="hidden h-11 w-11 place-items-center sm:grid" aria-label={user ? 'Your account' : 'Sign in'}><User size={20} strokeWidth={1.3} /></Link>
           <Link href="/wishlist" className="relative hidden h-11 w-11 place-items-center sm:grid" aria-label={`Wishlist (${wishlist.length})`}>

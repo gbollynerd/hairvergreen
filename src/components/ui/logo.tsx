@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 /** The Hairver Green "H" mark: serif H, profile on the right stem, flowing strands as the crossbar. */
 export function Mark({ className, title = 'Hairver Green' }: { className?: string; title?: string }) {
   return (
-    <svg viewBox="20 20 170 160" className={cn('block', className)} role="img" aria-label={title} fill="currentColor">
+    <svg viewBox="20 20 170 160" className={cn('block', className)} {...(title ? { role: 'img', 'aria-label': title } : { 'aria-hidden': true })} fill="currentColor">
       <path d="M34 30H58V33C54 34 53 36 53 40V160C53 164 54 166 58 167V170H34V167C38 166 39 164 39 160V40C39 36 38 34 34 33Z" />
       <path d="M142 30H166V33C162 34 161 36 161 40V160C161 164 162 166 166 167V170H142V167C146 166 147 164 147 160V40C147 36 146 34 142 33Z" />
       <path d="M160 60C168 62 172 70 171 80L171 84C172 88 176 92 177 96C176 98 173 99 172 100C173 103 172 105 171 106C173 108 172 111 170 112C170 116 168 120 164 121C162 122 161 126 160 132Z" />
