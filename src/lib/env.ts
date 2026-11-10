@@ -15,6 +15,8 @@ export function serverEnv() {
     paystackSecretKey: process.env.PAYSTACK_SECRET_KEY || '',
     resendApiKey: process.env.RESEND_API_KEY || '',
     emailFrom: process.env.EMAIL_FROM || 'Hairver Green <orders@hairvergreen.com>',
+    // Where customer replies to our emails go
+    emailReplyTo: process.env.EMAIL_REPLY_TO || 'hairvergreen@gmail.com',
     bootstrapAdmins: (process.env.BOOTSTRAP_SUPER_ADMIN_EMAILS || '')
       .split(',').map((s) => s.trim().toLowerCase()).filter(Boolean),
     cronSecret: process.env.CRON_SECRET || '',

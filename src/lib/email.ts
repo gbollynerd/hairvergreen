@@ -9,7 +9,7 @@ import type { Order, OrderItem } from '@/lib/types';
 type Mail = { to: string | string[]; subject: string; html: string; replyTo?: string };
 
 export async function sendEmail(m: Mail) {
-  const { resendApiKey, emailFrom } = serverEnv();
+  const { resendApiKey, emailFrom, emailReplyTo } = serverEnv();
   if (!resendApiKey) {
     console.info(`[email:skipped] to=${m.to} subject="${m.subject}"`);
     return { skipped: true };
@@ -18,7 +18,7 @@ export async function sendEmail(m: Mail) {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${resendApiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: emailFrom, to: m.to, subject: m.subject, html: m.html, reply_to: m.replyTo }),
+      body: JSON.stringify({ from: emailFrom, to: m.to, subject: m.subject, html: m.html, reply_to: m.replyTo || emailReplyTo }),
       signal: AbortSignal.timeout(15_000),
     });
     if (!res.ok) console.error('[email] failed', res.status, await res.text());

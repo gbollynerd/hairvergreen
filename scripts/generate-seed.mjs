@@ -77,7 +77,7 @@ insert into public.role_permissions (role_id, permission_key) select r.id, k fro
 const settings = {
   store: [true, {
     name: 'Hairver Green', short_name: 'HairverGreen', tagline: 'Luxury Hair House',
-    email: 'hello@hairvergreen.com', phone: '', whatsapp: '', address: 'Lagos, Nigeria', city: 'Lagos', country: 'NG',
+    email: 'hairvergreen@gmail.com', phone: '', whatsapp: '', address: 'Lagos, Nigeria', city: 'Lagos', country: 'NG',
     instagram: 'https://www.instagram.com/hairvergreen/', tiktok: '', support_hours: 'Mon–Sat, 9am–6pm WAT',
   }],
   theme: [true, {
