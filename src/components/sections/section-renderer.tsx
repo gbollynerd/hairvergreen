@@ -10,12 +10,12 @@ import { NewsletterForm } from '@/components/store/newsletter-form';
 import { Accordion } from '@/components/ui/accordion';
 import { ProductRail } from './product-rail';
 import { Countdown } from './countdown';
-import { InstagramTile } from './instagram-tile';
+import { SocialEmbedTile } from './social-embed-tile';
 import { listProducts, productsBySlugs, productsByIds, getFeaturedReviews, getAttributes, getCollection, toCard } from '@/lib/data/catalog';
 import { getPosts, getSocialPosts } from '@/lib/data/content';
 import { supabasePublic } from '@/lib/supabase/public';
 import { sanitizeHtml } from '@/lib/sanitize';
-import { parseInstagramUrl } from '@/lib/instagram';
+import { socialEmbed } from '@/lib/social-embed';
 import { cn, formatDate } from '@/lib/utils';
 
 type S = Record<string, any>;
@@ -368,20 +368,22 @@ async function SocialGallery({ s }: { s: S }) {
       <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 scrollbar-none md:mx-0 md:grid md:grid-cols-4 md:gap-x-3 md:gap-y-8 md:overflow-visible md:px-0 md:pb-0">
         {posts.map((p, i) => {
           const prod = linked.find((x) => p.product_ids.includes(x.id));
-          const ig = p.platform === 'instagram' ? parseInstagramUrl(p.permalink) : null;
-          const cover = p.media?.url ?? p.image_url;
-          const alt = p.caption ?? 'Hairver Green on Instagram';
-          const out = ig?.permalink ?? p.permalink;
+          // Instagram / TikTok rows show the platform's embed; anything else shows the uploaded image or video.
+          const embed = socialEmbed(p.platform, p.permalink);
+          const src = p.image_url ?? p.media?.url;
+          const isVideo = !!src && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(src);
+          const alt = p.caption ?? 'Hairver Green on social';
+          const out = embed?.permalink ?? p.permalink;
+          const href = prod ? `/products/${prod.slug}` : out;
+          const still = isVideo ? <Video src={src} className="absolute inset-0" /> : <Media src={src} alt={alt} fill sizes="(min-width:768px) 25vw, 72vw" className="zoom-on-hover" />;
           return (
             <Reveal key={p.id} delay={(i % 4) * 70} className="w-[72%] shrink-0 snap-center sm:w-[44%] md:w-auto">
-              {ig ? <InstagramTile embedUrl={ig.embedUrl} kind={ig.kind} cover={cover} alt={alt} /> : (
-                <Link href={prod ? `/products/${prod.slug}` : out || '#'} className="group relative block aspect-[4/5] overflow-hidden bg-panel" {...(!prod && out ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-                  <Media src={cover} alt={alt} fill sizes="(min-width:768px) 25vw, 72vw" className="zoom-on-hover" />
-                </Link>
-              )}
+              {embed ? <SocialEmbedTile platform={embed.platform} embedUrl={embed.embedUrl} label={embed.label} alt={alt} />
+                : href ? <Link href={href} aria-label={alt} className="group relative block aspect-[4/5] overflow-hidden bg-panel" {...(!prod ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{still}</Link>
+                : <div className="group relative aspect-[4/5] overflow-hidden bg-panel">{still}</div>}
               <div className="mt-3 flex items-baseline justify-between gap-3 text-[12px]">
                 {prod ? <Link href={`/products/${prod.slug}`} className="link-underline truncate">Shop · {prod.name}</Link> : <span />}
-                {out && <a href={out} target="_blank" rel="noopener noreferrer" className="shrink-0 text-muted hover:text-ink" aria-label={`${alt} — open on Instagram`}>{ig ? 'Open on Instagram' : 'View post'} ↗</a>}
+                {out && <a href={out} target="_blank" rel="noopener noreferrer" className="shrink-0 text-muted hover:text-ink" aria-label={`${alt} — open the original post`}>{embed ? `Open on ${embed.platform === 'tiktok' ? 'TikTok' : 'Instagram'}` : 'View post'} ↗</a>}
               </div>
             </Reveal>
           );

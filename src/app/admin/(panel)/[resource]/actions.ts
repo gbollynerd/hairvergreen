@@ -5,7 +5,15 @@ import { audit } from '@/lib/audit';
 import { RESOURCES, type FieldDef } from '@/lib/admin/resources';
 import { slugify } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/sanitize';
-import { parseInstagramUrl } from '@/lib/instagram';
+import { socialEmbed, isTikTokShortLink } from '@/lib/social-embed';
+
+/** Follows a short share link (e.g. vm.tiktok.com/…) to the full post address. Returns the input if that fails. */
+async function resolveRedirect(link: string): Promise<string> {
+  try {
+    const res = await fetch(link, { redirect: 'follow', signal: AbortSignal.timeout(6000), headers: { 'user-agent': 'Mozilla/5.0' } });
+    return res.url || link;
+  } catch { return link; }
+}
 
 function parseField(f: FieldDef, fd: FormData): unknown {
   const raw = fd.get(f.name);
@@ -53,14 +61,20 @@ export async function saveResource(key: string, id: string, _: ActionResult, fd:
     if (key === 'shipping-zones' || key === 'discounts') for (const k of ['countries', 'currencies']) if (Array.isArray(data[k])) data[k] = (data[k] as string[]).map((c) => c.toUpperCase().trim());
     if (key === 'announcements' || key === 'popups') for (const k of ['devices', 'page_paths']) if (data[k] === undefined) delete data[k];
     if (key === 'social') {
+      // "What to show" decides everything: an embed needs a post link (any upload is dropped); an upload needs a file.
       data.media_id = null;
-      data.platform = data.platform ?? 'instagram';
-      const ig = data.platform === 'instagram' ? parseInstagramUrl(data.permalink as string | null) : null;
-      if (ig) data.permalink = ig.permalink;
-      else if (!data.image_url) {
-        return { error: data.permalink && data.platform === 'instagram'
-          ? 'That isn’t a link to a single Instagram post or reel. Open the post, choose Share → Copy link and paste that — or add a cover image.'
-          : 'Paste an Instagram post or reel link, or add a cover image.' };
+      const platform = (data.platform = data.platform ?? 'instagram') as string;
+      if (platform === 'other') {
+        if (!data.image_url) return { error: 'Choose the image or video to show.' };
+      } else {
+        const name = platform === 'tiktok' ? 'TikTok' : 'Instagram';
+        let link = data.permalink as string | null;
+        if (!link) return { error: `Paste the ${name} post link.` };
+        if (platform === 'tiktok' && isTikTokShortLink(link)) link = await resolveRedirect(link);
+        const embed = socialEmbed(platform, link);
+        if (!embed) return { error: `That isn’t a link to a single ${name} post. Open the post, choose Share → Copy link and paste that.` };
+        data.permalink = embed.permalink;
+        data.image_url = null;
       }
     }
 
