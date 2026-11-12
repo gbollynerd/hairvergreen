@@ -5,6 +5,7 @@ import { audit } from '@/lib/audit';
 import { RESOURCES, type FieldDef } from '@/lib/admin/resources';
 import { slugify } from '@/lib/utils';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { parseInstagramUrl } from '@/lib/instagram';
 
 function parseField(f: FieldDef, fd: FormData): unknown {
   const raw = fd.get(f.name);
@@ -51,7 +52,17 @@ export async function saveResource(key: string, id: string, _: ActionResult, fd:
     if (key === 'popups') { data.style = { layout: data.style_layout ?? 'split', background: data.style_background ?? 'ivory', animation: 'fade' }; delete data.style_layout; delete data.style_background; }
     if (key === 'shipping-zones' || key === 'discounts') for (const k of ['countries', 'currencies']) if (Array.isArray(data[k])) data[k] = (data[k] as string[]).map((c) => c.toUpperCase().trim());
     if (key === 'announcements' || key === 'popups') for (const k of ['devices', 'page_paths']) if (data[k] === undefined) delete data[k];
-    if (key === 'social') data.media_id = null;
+    if (key === 'social') {
+      data.media_id = null;
+      data.platform = data.platform ?? 'instagram';
+      const ig = data.platform === 'instagram' ? parseInstagramUrl(data.permalink as string | null) : null;
+      if (ig) data.permalink = ig.permalink;
+      else if (!data.image_url) {
+        return { error: data.permalink && data.platform === 'instagram'
+          ? 'That isn’t a link to a single Instagram post or reel. Open the post, choose Share → Copy link and paste that — or add a cover image.'
+          : 'Paste an Instagram post or reel link, or add a cover image.' };
+      }
+    }
 
     const db = supabaseAdmin();
     let before: Record<string, unknown> | null = null;

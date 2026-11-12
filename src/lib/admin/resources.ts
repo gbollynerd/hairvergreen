@@ -124,11 +124,14 @@ export const RESOURCES: Record<string, ResourceDef> = {
   },
   social: {
     key: 'social', table: 'social_posts', title: 'Social gallery', singular: 'post', titleField: 'caption', permission: 'social.manage', refresh: 'content',
-    description: 'Curate Instagram/TikTok images for the homepage and link them to products.', orderBy: [['sort', true]],
-    columns: [{ name: 'image_url', label: 'Image', format: 'image' }, { name: 'caption', label: 'Caption' }, { name: 'platform', label: 'Platform', format: 'badge' }, { name: 'product_ids', label: 'Products', format: 'count' }, { name: 'is_visible', label: 'Visible', format: 'boolean' }],
+    description: 'Posts and reels shown in the “Follow the Hairver Green world” section. Paste an Instagram link and it plays on the site; the first 8 visible posts are shown, in order.', orderBy: [['sort', true]],
+    columns: [{ name: 'image_url', label: 'Cover', format: 'image' }, { name: 'caption', label: 'Caption' }, { name: 'permalink', label: 'Link' }, { name: 'platform', label: 'Platform', format: 'badge' }, { name: 'product_ids', label: 'Products', format: 'count' }, { name: 'is_visible', label: 'Visible', format: 'boolean' }],
     fields: [
-      { name: 'image_url', label: 'Image', type: 'media', required: true }, { name: 'platform', label: 'Platform', type: 'select', options: [['instagram', 'Instagram'], ['tiktok', 'TikTok'], ['other', 'Other']] },
-      { name: 'permalink', label: 'Post link', type: 'text', placeholder: 'https://www.instagram.com/p/…', span: 2 }, { name: 'caption', label: 'Caption / alt text', type: 'textarea', span: 2 },
+      { name: 'permalink', label: 'Instagram post or reel link', type: 'text', placeholder: 'https://www.instagram.com/reel/…', span: 2,
+        hint: 'On Instagram, open the post or reel → Share → Copy link, then paste it here. The account must be public.' },
+      { name: 'image_url', label: 'Cover image (optional)', type: 'media', hint: 'Leave empty to show the post straight from Instagram. With a cover, the post loads only when a visitor taps it. Required if there is no Instagram link.' },
+      { name: 'platform', label: 'Platform', type: 'select', options: [['instagram', 'Instagram'], ['tiktok', 'TikTok'], ['other', 'Other']], default: 'instagram' },
+      { name: 'caption', label: 'Caption / alt text', type: 'textarea', span: 2, hint: 'Not shown on the page — describes the post for screen readers and search engines.' },
       { name: 'product_ids', label: 'Shop this look — products', type: 'multiselect', optionsFrom: 'products', span: 2 },
       { name: 'sort', label: 'Order', type: 'number' }, { name: 'is_visible', label: 'Visible', type: 'boolean', default: true },
     ],

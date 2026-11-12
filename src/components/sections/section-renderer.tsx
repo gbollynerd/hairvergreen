@@ -10,10 +10,12 @@ import { NewsletterForm } from '@/components/store/newsletter-form';
 import { Accordion } from '@/components/ui/accordion';
 import { ProductRail } from './product-rail';
 import { Countdown } from './countdown';
+import { InstagramTile } from './instagram-tile';
 import { listProducts, productsBySlugs, productsByIds, getFeaturedReviews, getAttributes, getCollection, toCard } from '@/lib/data/catalog';
 import { getPosts, getSocialPosts } from '@/lib/data/content';
 import { supabasePublic } from '@/lib/supabase/public';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { parseInstagramUrl } from '@/lib/instagram';
 import { cn, formatDate } from '@/lib/utils';
 
 type S = Record<string, any>;
@@ -356,22 +358,31 @@ async function Reviews({ s }: { s: S }) {
 }
 
 async function SocialGallery({ s }: { s: S }) {
-  const posts = await getSocialPosts();
+  const posts = (await getSocialPosts()).slice(0, 8);
   if (!posts.length) return null;
   const linked = await productsByIds([...new Set(posts.flatMap((p) => p.product_ids))]);
   return (
     <Shell s={s}>
       <Heading s={s} center />
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4 md:gap-3">
-        {posts.slice(0, 8).map((p, i) => {
+      {/* Phones: a swipeable rail so each post is big enough to watch. Desktop: a four-up grid. */}
+      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 scrollbar-none md:mx-0 md:grid md:grid-cols-4 md:gap-x-3 md:gap-y-8 md:overflow-visible md:px-0 md:pb-0">
+        {posts.map((p, i) => {
           const prod = linked.find((x) => p.product_ids.includes(x.id));
-          const href = prod ? `/products/${prod.slug}` : p.permalink || '#';
+          const ig = p.platform === 'instagram' ? parseInstagramUrl(p.permalink) : null;
+          const cover = p.media?.url ?? p.image_url;
+          const alt = p.caption ?? 'Hairver Green on Instagram';
+          const out = ig?.permalink ?? p.permalink;
           return (
-            <Reveal key={p.id} delay={(i % 4) * 70}>
-              <Link href={href} className="group relative block aspect-square overflow-hidden bg-panel" {...(!prod && p.permalink ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-                <Media src={p.media?.url ?? p.image_url} alt={p.caption ?? 'Hairver Green on Instagram'} fill sizes="25vw" className="zoom-on-hover" />
-                {prod && <span className="absolute inset-x-0 bottom-0 translate-y-full bg-surface/95 px-3 py-2 text-[12px] transition-transform duration-500 group-hover:translate-y-0">Shop · {prod.name}</span>}
-              </Link>
+            <Reveal key={p.id} delay={(i % 4) * 70} className="w-[72%] shrink-0 snap-center sm:w-[44%] md:w-auto">
+              {ig ? <InstagramTile embedUrl={ig.embedUrl} kind={ig.kind} cover={cover} alt={alt} /> : (
+                <Link href={prod ? `/products/${prod.slug}` : out || '#'} className="group relative block aspect-[4/5] overflow-hidden bg-panel" {...(!prod && out ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                  <Media src={cover} alt={alt} fill sizes="(min-width:768px) 25vw, 72vw" className="zoom-on-hover" />
+                </Link>
+              )}
+              <div className="mt-3 flex items-baseline justify-between gap-3 text-[12px]">
+                {prod ? <Link href={`/products/${prod.slug}`} className="link-underline truncate">Shop · {prod.name}</Link> : <span />}
+                {out && <a href={out} target="_blank" rel="noopener noreferrer" className="shrink-0 text-muted hover:text-ink" aria-label={`${alt} — open on Instagram`}>{ig ? 'Open on Instagram' : 'View post'} ↗</a>}
+              </div>
             </Reveal>
           );
         })}
