@@ -8,9 +8,9 @@ import { cn } from '@/lib/utils';
  * One Instagram or TikTok post, shown and played on the site through the platform's own embed.
  * Works for photos and videos alike. The embed only loads once the tile is close to the screen.
  * Instagram's embed is framed so only its media shows (its profile bar and footer are clipped);
- * TikTok's player already fills its frame.
+ * TikTok's player already fills its frame. `still` marks a photo post: clicks on it are blocked so it cannot link out.
  */
-export function SocialEmbedTile({ platform, embedUrl, label, alt }: { platform: 'instagram' | 'tiktok'; embedUrl: string; label: string; alt: string }) {
+export function SocialEmbedTile({ platform, embedUrl, label, alt, still }: { platform: 'instagram' | 'tiktok'; embedUrl: string; label: string; alt: string; still?: boolean }) {
   const box = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
   const [active, setActive] = useState(false);
@@ -44,6 +44,8 @@ export function SocialEmbedTile({ platform, embedUrl, label, alt }: { platform: 
           style={ig ? { width: base, height: base * 1.25 + IG_EMBED_HEADER, top: -IG_EMBED_HEADER * scale, transform: `scale(${scale})` } : undefined}
         />
       )}
+      {/* Instagram makes a photo one big link to itself. A photo has nothing to play, so a clear layer swallows the click. */}
+      {still && <div className="absolute inset-0" aria-hidden />}
       {ig && (
         <span className="pointer-events-none absolute left-2 top-2 flex items-center gap-1.5 bg-surface/90 px-2 py-1 text-[10px] uppercase tracking-[0.16em] text-ink">
           <Icon width={12} height={12} /> {label}
