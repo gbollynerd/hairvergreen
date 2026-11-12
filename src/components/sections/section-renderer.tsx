@@ -373,17 +373,20 @@ async function SocialGallery({ s }: { s: S }) {
           const src = p.image_url ?? p.media?.url;
           const isVideo = !!src && /\.(mp4|webm|mov|m4v)(\?|#|$)/i.test(src);
           const alt = p.caption ?? 'Hairver Green on social';
-          const out = embed?.permalink ?? p.permalink;
+          // Embedded posts carry their own way through to the platform, so only uploads get a link underneath.
+          const out = embed ? null : p.permalink;
           const still = isVideo ? <Video src={src} className="absolute inset-0" /> : <Media src={src} alt={alt} fill sizes="(min-width:768px) 25vw, 72vw" className="zoom-on-hover" />;
           return (
             <Reveal key={p.id} delay={(i % 4) * 70} className="w-[72%] shrink-0 snap-center sm:w-[44%] md:w-auto">
-              {/* Embeds stay fully interactive (play, carousel arrows). Uploaded tiles do not link out — the link below does. */}
+              {/* Embeds stay fully interactive (play, carousel arrows). Uploaded tiles do not link out — their “View post” link below does. */}
               {embed ? <SocialEmbedTile platform={embed.platform} embedUrl={embed.embedUrl} label={embed.label} alt={alt} />
                 : <div className="group relative aspect-[4/5] overflow-hidden bg-panel">{still}</div>}
-              <div className="mt-3 flex items-baseline justify-between gap-3 text-[12px]">
-                {prod ? <Link href={`/products/${prod.slug}`} className="link-underline truncate">Shop · {prod.name}</Link> : <span />}
-                {out && <a href={out} target="_blank" rel="noopener noreferrer" className="shrink-0 text-muted hover:text-ink" aria-label={`${alt} — open the original post`}>{embed ? `Open on ${embed.platform === 'tiktok' ? 'TikTok' : 'Instagram'}` : 'View post'} ↗</a>}
-              </div>
+              {(prod || out) && (
+                <div className="mt-3 flex items-baseline justify-between gap-3 text-[12px]">
+                  {prod ? <Link href={`/products/${prod.slug}`} className="link-underline truncate">Shop · {prod.name}</Link> : <span />}
+                  {out && <a href={out} target="_blank" rel="noopener noreferrer" className="shrink-0 text-muted hover:text-ink" aria-label={`${alt} — open the original post`}>View post ↗</a>}
+                </div>
+              )}
             </Reveal>
           );
         })}

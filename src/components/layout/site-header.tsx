@@ -7,12 +7,13 @@ import { Search, User, Heart, ShoppingBag, Menu, ChevronDown } from 'lucide-reac
 import { useStore } from '@/components/store/store-provider';
 import { Mark, Wordmark } from '@/components/ui/logo';
 import { Media } from '@/components/ui/media';
+import { InstagramIcon } from '@/components/ui/icons';
 import type { MenuItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 export type NavItem = MenuItem & { children?: MenuItem[] };
 
-export function SiteHeader({ nav, logoUrl }: { nav: NavItem[]; logoUrl?: string | null }) {
+export function SiteHeader({ nav, logoUrl, instagram }: { nav: NavItem[]; logoUrl?: string | null; instagram?: string | null }) {
   const { cart, setCartOpen, setSearchOpen, setMenuOpen, wishlist, user } = useStore();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
@@ -46,6 +47,7 @@ export function SiteHeader({ nav, logoUrl }: { nav: NavItem[]; logoUrl?: string 
           <Wordmark logoUrl={logoUrl} />
         </Link>
         <div className="flex items-center justify-end gap-0.5">
+          {instagram && <a href={instagram} target="_blank" rel="noopener noreferrer" className="hidden h-11 w-11 place-items-center sm:grid" aria-label="Hairver Green on Instagram"><InstagramIcon width={20} height={20} strokeWidth={1.3} /></a>}
           <Link href={user ? '/account' : '/login'} className="hidden h-11 w-11 place-items-center sm:grid" aria-label={user ? 'Your account' : 'Sign in'}><User size={20} strokeWidth={1.3} /></Link>
           <Link href="/wishlist" className="relative hidden h-11 w-11 place-items-center sm:grid" aria-label={`Wishlist (${wishlist.length})`}>
             <Heart size={20} strokeWidth={1.3} />

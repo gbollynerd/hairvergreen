@@ -35,7 +35,7 @@ export default async function StoreLayout({ children }: LayoutProps<'/'>) {
     <StoreProvider currencies={settings.currencies.display}>
       <OrganizationJsonLd store={settings.store} />
       <AnnouncementBar items={announcements} />
-      <SiteHeader nav={nav} logoUrl={settings.theme.logo_media_url} />
+      <SiteHeader nav={nav} logoUrl={settings.theme.logo_media_url} instagram={settings.store.instagram} />
       <main id="main" className="min-h-[60vh] pb-[60px] md:pb-0">{children}</main>
       <SiteFooter menus={menus} store={settings.store} />
       <MobileMenu nav={nav} social={{ instagram: settings.store.instagram, tiktok: settings.store.tiktok, whatsapp: settings.store.whatsapp }} />
