@@ -377,8 +377,8 @@ async function SocialGallery({ s }: { s: S }) {
           const still = isVideo ? <Video src={src} className="absolute inset-0" /> : <Media src={src} alt={alt} fill sizes="(min-width:768px) 25vw, 72vw" className="zoom-on-hover" />;
           return (
             <Reveal key={p.id} delay={(i % 4) * 70} className="w-[72%] shrink-0 snap-center sm:w-[44%] md:w-auto">
-              {/* The tile itself never links out — only the "Open on …" link below does. */}
-              {embed ? <SocialEmbedTile platform={embed.platform} embedUrl={embed.embedUrl} label={embed.label} alt={alt} still={embed.label === 'Post'} />
+              {/* Embeds stay fully interactive (play, carousel arrows). Uploaded tiles do not link out — the link below does. */}
+              {embed ? <SocialEmbedTile platform={embed.platform} embedUrl={embed.embedUrl} label={embed.label} alt={alt} />
                 : <div className="group relative aspect-[4/5] overflow-hidden bg-panel">{still}</div>}
               <div className="mt-3 flex items-baseline justify-between gap-3 text-[12px]">
                 {prod ? <Link href={`/products/${prod.slug}`} className="link-underline truncate">Shop · {prod.name}</Link> : <span />}
